@@ -63,18 +63,13 @@ Point Ship::touchToPoint(Touch* touch)
 	return Director::getInstance()->convertToGL(touch->getLocationInView());
 }
 
-bool Ship::isTouchingSprite(Touch* touch)
-{
-	return (this->shipSprite->getPosition().getDistance(this->touchToPoint(touch)) < 100.0f);
-}
-
 void Ship::onTouchesBegan(const std::vector<Touch*>& touches, Event* event)
 {
 	this->touchOffset = Point::ZERO;
 
 	for (auto touch : touches)
 	{
-		if (touch && this->isTouchingSprite(touch))
+		if (touch)
 			this->touchOffset = this->shipSprite->getPosition() - this->touchToPoint(touch);
 	}
 }

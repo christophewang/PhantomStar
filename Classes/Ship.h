@@ -19,7 +19,6 @@ public:
 	~Ship();
 
 	Point touchToPoint(Touch* touch);
-	bool isTouchingSprite(Touch* touch);
 	void onTouchesBegan(const std::vector<Touch*>& touches, Event* event);
 	void onTouchesMoved(const std::vector<Touch*>& touches, Event* event);
 	void onTouchesEnded(const std::vector<Touch*>& touches, Event* event);
