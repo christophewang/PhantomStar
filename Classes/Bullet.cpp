@@ -49,5 +49,5 @@ void Bullet::update(float delta)
 			this->removeBullet(bullets[i]);
 		}
 	}
-	CCLOG("Bullet size: %i", bullets.size());
+	//CCLOG("Bullet size: %i", bullets.size());
 }

@@ -122,5 +122,5 @@ void Star::update(float delta)
 			this->removeStar(stars[i]);
 		}
 	}
-	CCLOG("Star size: %i", stars.size());
+	//CCLOG("Star size: %i", stars.size());
 }

@@ -17,10 +17,12 @@ private:
 	PhysicsWorld *sceneWorld;
 	CCParallaxScrollNode *parallaxBg;
 	Ship *ship;
-	Meteor *meteor;
-	Star *star;
+	
 	Label *scoreLabel;
 	float timerMeteor;
+
+	Star *star;
+	std::vector<Meteor *> meteorArray;
 public:
 	~GameScene();
 	static Scene *createScene();
@@ -31,6 +33,11 @@ public:
 	void setPhysicsWorld(PhysicsWorld *world);
 	void setParallaxBackground();
 	bool onContactBegin(PhysicsContact &contact);
+
+	void meteorCollision(Sprite *meteor);
+	void meteorUpdate();
+
+	void spawnStar(int type, Point pos);
 
 	static int scorePoints;
 	static float speedBullet;

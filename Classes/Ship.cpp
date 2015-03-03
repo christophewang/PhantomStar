@@ -12,11 +12,11 @@ Ship::Ship(Layer *layer)
 	bulletTimer = 0;
 
 	std::srand(time(NULL));
-	int shipIndex = rand() % 16 + 1;
+	int shipIndex = rand() % 12 + 1;
 
 	__String *shipString = __String::createWithFormat("Ships/ship%i.png", shipIndex);
 	shipSprite = Sprite::create(shipString->getCString());
-
+	shipSprite->setScale(0.75);
 	/*auto shield = Sprite::create("Effects/shield1.png");
 	shield->setPosition(Point(shipSprite->getContentSize().width / 2, shipSprite->getContentSize().height / 2));
 	shipSprite->addChild(shield, 1);*/
@@ -30,10 +30,9 @@ Ship::Ship(Layer *layer)
 	emitter->setDuration(ParticleSystem::DURATION_INFINITY);
 	emitter->setPosition(shipSprite->getContentSize().width / 2, -10);
 	shipSprite->addChild(emitter, 1);*/
-
 	shipSprite->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-	shipSprite->setScale(0.75);
-	auto shipBody = PhysicsBody::createCircle(shipSprite->getContentSize().width / 2);
+	
+	auto shipBody = PhysicsBody::createCircle((shipSprite->getContentSize().width * 0.75) / 2);
 	
 	shipBody->setCollisionBitmask(COLLISION_SHIP);
 	shipBody->setContactTestBitmask(true);

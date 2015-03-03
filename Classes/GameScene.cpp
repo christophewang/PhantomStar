@@ -12,7 +12,6 @@ float GameScene::frequencyBullet = 0.0005f;
 GameScene::~GameScene()
 {
 	delete ship;
-	delete meteor;
 	delete star;
 }
 
@@ -35,7 +34,6 @@ bool GameScene::init()
 	origin = Director::getInstance()->getVisibleOrigin();
 
 	ship = new Ship(this);
-	meteor = new Meteor(this);
 	star = new Star(this);
 
 	timerMeteor = 0;
@@ -102,20 +100,18 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_METEOR && b->getCollisionBitmask() == COLLISION_BULLET)
 	{
 		GameScene::incrementScore(1);
-		aSprite->removeFromParentAndCleanup(true);
+		this->meteorCollision(aSprite);
+
 		bSprite->removeFromParentAndCleanup(true);
-		meteor->removeMeteor(aSprite);
 		ship->getBullet()->removeBullet(bSprite);
-		this->star->spawnStarGold(aPos);
 	}
 	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_METEOR && a->getCollisionBitmask() == COLLISION_BULLET)
 	{
 		GameScene::incrementScore(1);
+		this->meteorCollision(bSprite);
+
 		aSprite->removeFromParentAndCleanup(true);
-		bSprite->removeFromParentAndCleanup(true);
-		meteor->removeMeteor(bSprite);
 		ship->getBullet()->removeBullet(aSprite);
-		this->star->spawnStarGold(bPos);
 	}
 	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP && b->getCollisionBitmask() == COLLISION_STAR_BRONZE)
 	{
@@ -157,15 +153,58 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 	return true;
 }
 
+void GameScene::meteorCollision(Sprite *meteor)
+{
+	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
+	{
+		if (this->meteorArray[i]->getSprite() == meteor)
+		{
+			this->meteorArray[i]->reduceLife();
+			if (this->meteorArray[i]->getLife() <= 0)
+			{
+				this->spawnStar(this->meteorArray[i]->getType(), this->meteorArray[i]->getPosition());
+				this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
+				delete this->meteorArray[i];
+				this->meteorArray.erase(this->meteorArray.begin() + i);
+			}
+		}
+	}
+}
+
+void GameScene::meteorUpdate()
+{
+	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
+	{
+		if (this->meteorArray[i]->getPositionY() < origin.y)
+		{
+			this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
+			delete this->meteorArray[i];
+			this->meteorArray.erase(this->meteorArray.begin() + i);
+		}
+	}
+	CCLOG("Meteor size: %i", meteorArray.size());
+}
+
+void GameScene::spawnStar(int type, Point pos)
+{
+	if (type == 1)
+		this->star->spawnStarBronze(pos);
+	else if (type == 2)
+		this->star->spawnStarSilver(pos);
+	else if (type == 3)
+		this->star->spawnStarGold(pos);
+
+}
+
 void GameScene::update(float delta)
 {
 	this->timerMeteor += delta;
 	if (this->timerMeteor > GameScene::frequencyMeteor * this->visibleSize.width)
 	{
 		this->timerMeteor = 0;
-		this->meteor->spawnMeteor();
+		meteorArray.push_back(new Meteor(this));
+		this->meteorUpdate();
 	}
-	this->meteor->update(delta);
 	this->star->update(delta);
 	this->ship->update(delta);
 	this->scoreLabel->setString(std::to_string(GameScene::scorePoints));
@@ -185,28 +224,24 @@ void GameScene::setDifficulty()
 		GameScene::speedMeteor = 0.004f;
 		GameScene::speedBackground = -0.02f;
 		GameScene::frequencyMeteor = 0.0009f;
-		CCLOG("MACH 1");
 	} 
 	else if (GameScene::scorePoints > 500 && GameScene::scorePoints < 1000)
 	{
 		GameScene::speedMeteor = 0.003f;
 		GameScene::speedBackground = -0.03f;
 		GameScene::frequencyMeteor = 0.0008f;
-		CCLOG("MACH 2");
 	}
 	else if (GameScene::scorePoints > 1000 && GameScene::scorePoints < 2000)
 	{
 		GameScene::speedMeteor = 0.002f;
 		GameScene::speedBackground = -0.04f;
 		GameScene::frequencyMeteor = 0.0007f;
-		CCLOG("MACH 3");
 	}
 	else if (GameScene::scorePoints > 2000)
 	{
 		GameScene::speedMeteor = 0.001f;
 		GameScene::speedBackground = -0.05f;
 		GameScene::frequencyMeteor = 0.0006f;
-		CCLOG("MACH 4");
 	}
 }
 

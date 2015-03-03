@@ -7,15 +7,20 @@ USING_NS_CC;
 class Meteor
 {
 private:
-	Size visibleSize;
-	Vec2 origin;
-	Layer *layer;
-	std::vector<Sprite *> meteors;
+	int type;
+	int life;
+	float width;
+	float height;
+	Sprite *sprite;
+	PhysicsBody *body;
 public:
 	Meteor(Layer *layer);
-	~Meteor();
-	void spawnMeteor();
-	void update(float delta);
-	void removeMeteor(Sprite *meteorSprite);
+	~Meteor() {}
+	int getType() const;
+	int getLife() const;
+	void reduceLife();
+	Point getPosition() const;
+	float getPositionX() const;
+	float getPositionY() const;
+	Sprite *getSprite() const;
 };
-
