@@ -34,6 +34,7 @@ void Meteor::spawnMeteor()
 		posX = visibleSize.width - meteorSprite->getContentSize().width / 2;
 
 	meteorSprite->setPosition(Point(posX + origin.x, visibleSize.height + meteorSprite->getContentSize().height + origin.y));
+	meteorSprite->setScale(0.75);
 	meteors.push_back(meteorSprite);
 	layer->addChild(meteorSprite);
 	auto meteorMoveTo = MoveTo::create(GameScene::speedMeteor * visibleSize.height, 
