@@ -25,7 +25,7 @@ Meteor::Meteor(Layer *layer)
 		this->life = 1;
 	}
 	__String *meteorString = __String::createWithFormat("Meteors/meteor%i.png", meteorIndex);
-	
+
 	this->sprite = Sprite::create(meteorString->getCString());
 	this->body = PhysicsBody::createCircle(this->sprite->getContentSize().width / 2);
 	this->body->setCollisionBitmask(COLLISION_METEOR);
@@ -43,7 +43,7 @@ Meteor::Meteor(Layer *layer)
 
 	this->sprite->setPosition(Point(posX + origin.x, visibleSize.height + this->height + origin.y));
 
-	auto meteorMoveTo = MoveTo::create(GameScene::speedMeteor * visibleSize.height, 
+	auto meteorMoveTo = MoveTo::create(GameScene::speedMeteor * visibleSize.height,
 		Point(posX + origin.x, -this->height + origin.y));
 	auto meteorRotateBy = RotateBy::create(GameScene::speedMeteor * visibleSize.height, 360);
 	this->sprite->runAction(Spawn::createWithTwoActions(meteorRotateBy, meteorMoveTo));
@@ -51,14 +51,27 @@ Meteor::Meteor(Layer *layer)
 	layer->addChild(this->sprite, 1);
 }
 
-int Meteor::getType() const
-{
-	return this->type;
-}
-
 int Meteor::getLife() const
 {
 	return this->life;
+}
+
+void Meteor::reduceLife()
+{
+	this->life--;
+}
+
+void Meteor::displayExplosion(Layer *layer)
+{
+	auto explosion = ParticleSystemQuad::create("Particles/meteorExplosion.plist");
+	explosion->setPosition(this->getPosition());
+	explosion->setAutoRemoveOnFinish(true);
+	layer->addChild(explosion, 1);
+}
+
+int Meteor::getType() const
+{
+	return this->type;
 }
 
 float Meteor::getWidth() const
@@ -89,9 +102,4 @@ float Meteor::getPositionX() const
 float Meteor::getPositionY() const
 {
 	return this->sprite->getPositionY();
-}
-
-void Meteor::reduceLife()
-{
-	this->life--;
 }

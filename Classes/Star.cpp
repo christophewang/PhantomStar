@@ -2,125 +2,81 @@
 
 USING_NS_CC;
 
-Star::Star(Layer *layer)
+Star::Star(Layer *layer, Point pos, int type)
 {
-	this->visibleSize = Director::getInstance()->getVisibleSize();
-	this->origin = Director::getInstance()->getVisibleOrigin();
-	this->layer = layer;
-	std::srand(time(NULL));
-}
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	auto origin = Director::getInstance()->getVisibleOrigin();
+	this->type = type;
 
-Star::~Star()
-{
-}
-
-void Star::spawnStarBronze(Point pos)
-{
-	auto starSprite = Sprite::create("Power-ups/star_bronze.png");
-	auto starBody = PhysicsBody::createCircle(starSprite->getContentSize().width / 2);
-
-	starBody->setCollisionBitmask(COLLISION_STAR_BRONZE);
-	starBody->setContactTestBitmask(true);
-	starBody->setDynamic(false);
-	starSprite->setPhysicsBody(starBody);
-
-	starSprite->setPosition(Point(pos.x + origin.x, pos.y + origin.y));
-	this->stars.push_back(starSprite);
-	this->layer->addChild(starSprite);
+	__String *starPath = __String::createWithFormat("Effects/starPoint%i.png", this->type);
+	this->sprite = Sprite::create(starPath->getCString());
+	this->width = this->sprite->getContentSize().width;
+	this->height = this->sprite->getContentSize().height;
+	this->body = PhysicsBody::createCircle(this->width / 2);
+	this->body->setCollisionBitmask(COLLISION_STAR);
+	this->body->setContactTestBitmask(true);
+	this->body->setDynamic(false);
+	this->sprite->setPhysicsBody(this->body);
+	this->sprite->setPosition(Point(pos.x + origin.x, pos.y + origin.y));
 
 	ccBezierConfig bezier;
 	if (pos.x >= visibleSize.width / 2)
 	{
 		bezier.controlPoint_1 = Point(pos.x / 2 + origin.x, pos.y * 0.75 + origin.y);
 		bezier.controlPoint_2 = Point(pos.x + origin.x, pos.y * 0.25 + origin.y);
-		bezier.endPosition = Point(pos.x * 2 + origin.x, -starSprite->getContentSize().height + origin.y);
+		bezier.endPosition = Point(pos.x * 2 + origin.x, -this->height + origin.y);
 	}
 	else
 	{
 		bezier.controlPoint_1 = Point(pos.x * 2 + origin.x, pos.y * 0.75 + origin.y);
 		bezier.controlPoint_2 = Point(pos.x + origin.x, pos.y * 0.25 + origin.y);
-		bezier.endPosition = Point(pos.x / 2 + origin.x, -starSprite->getContentSize().height + origin.y);
+		bezier.endPosition = Point(pos.x / 2 + origin.x, -this->height + origin.y);
 	}
 	auto starBezierTo = BezierTo::create(SPEED_STARS * visibleSize.height, bezier);
-	starSprite->runAction(starBezierTo);
+	this->sprite->runAction(starBezierTo);
+	layer->addChild(this->sprite, 1);
 }
 
-void Star::spawnStarSilver(Point pos)
+void Star::displayStarEffect(Layer *layer)
 {
-	auto starSprite = Sprite::create("Power-ups/star_silver.png");
-	auto starBody = PhysicsBody::createCircle(starSprite->getContentSize().width / 2);
-
-	starBody->setCollisionBitmask(COLLISION_STAR_SILVER);
-	starBody->setContactTestBitmask(true);
-	starBody->setDynamic(false);
-	starSprite->setPhysicsBody(starBody);
-
-	starSprite->setPosition(Point(pos.x + origin.x, pos.y + origin.y));
-	this->stars.push_back(starSprite);
-	this->layer->addChild(starSprite);
-
-	ccBezierConfig bezier;
-	if (pos.x >= visibleSize.width / 2)
-	{
-		bezier.controlPoint_1 = Point(pos.x / 2 + origin.x, pos.y * 0.75 + origin.y);
-		bezier.controlPoint_2 = Point(pos.x + origin.x, pos.y * 0.25 + origin.y);
-		bezier.endPosition = Point(pos.x * 2 + origin.x, -starSprite->getContentSize().height + origin.y);
-	}
-	else
-	{
-		bezier.controlPoint_1 = Point(pos.x * 2 + origin.x, pos.y * 0.75 + origin.y);
-		bezier.controlPoint_2 = Point(pos.x + origin.x, pos.y * 0.25 + origin.y);
-		bezier.endPosition = Point(pos.x / 2 + origin.x, -starSprite->getContentSize().height + origin.y);
-	}
-	auto starBezierTo = BezierTo::create(SPEED_STARS * visibleSize.height, bezier);
-	starSprite->runAction(starBezierTo);
+	__String *starPath = __String::createWithFormat("Particles/star%i.plist", this->type);
+	auto starEffect = ParticleSystemQuad::create(starPath->getCString());
+	starEffect->setPosition(this->getPosition());
+	starEffect->setAutoRemoveOnFinish(true);
+	layer->addChild(starEffect, 1);
 }
 
-void Star::spawnStarGold(Point pos)
+int Star::getType() const
 {
-	auto starSprite = Sprite::create("Power-ups/star_gold.png");
-	auto starBody = PhysicsBody::createCircle(starSprite->getContentSize().width / 2);
-
-	starBody->setCollisionBitmask(COLLISION_STAR_GOLD);
-	starBody->setContactTestBitmask(true);
-	starBody->setDynamic(false);
-	starSprite->setPhysicsBody(starBody);
-
-	starSprite->setPosition(Point(pos.x + origin.x, pos.y + origin.y));
-	this->stars.push_back(starSprite);
-	this->layer->addChild(starSprite);
-
-	ccBezierConfig bezier;
-	if (pos.x >= visibleSize.width / 2)
-	{
-		bezier.controlPoint_1 = Point(pos.x / 2 + origin.x, pos.y * 0.75 + origin.y);
-		bezier.controlPoint_2 = Point(pos.x + origin.x, pos.y * 0.25 + origin.y);
-		bezier.endPosition = Point(pos.x * 2 + origin.x, -starSprite->getContentSize().height + origin.y);
-	}
-	else
-	{
-		bezier.controlPoint_1 = Point(pos.x * 2 + origin.x, pos.y * 0.75 + origin.y);
-		bezier.controlPoint_2 = Point(pos.x + origin.x, pos.y * 0.25 + origin.y);
-		bezier.endPosition = Point(pos.x / 2 + origin.x, -starSprite->getContentSize().height + origin.y);
-	}
-	auto starBezierTo = BezierTo::create(SPEED_STARS * visibleSize.height, bezier);
-	starSprite->runAction(starBezierTo);
+	return this->type;
 }
 
-void Star::removeStar(Sprite *starSprite)
+float Star::getWidth() const
 {
-	stars.erase(std::remove(stars.begin(), stars.end(), starSprite), stars.end());
+	return this->width;
 }
 
-void Star::update(float delta)
+float Star::getHeight() const
 {
-	for (unsigned int i = 0; i < stars.size(); ++i)
-	{
-		if (stars[i]->getPosition().y < origin.y)
-		{
-			stars[i]->removeFromParentAndCleanup(true);
-			this->removeStar(stars[i]);
-		}
-	}
-	//CCLOG("Star size: %i", stars.size());
+	return this->height;
+}
+
+Sprite* Star::getSprite() const
+{
+	return this->sprite;
+}
+
+Point Star::getPosition() const
+{
+	return this->sprite->getPosition();
+}
+
+float Star::getPositionX() const
+{
+	return this->sprite->getPositionX();
+}
+
+float Star::getPositionY() const
+{
+	return this->sprite->getPositionY();
 }

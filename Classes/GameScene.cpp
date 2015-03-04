@@ -14,13 +14,6 @@ GameScene::GameScene()
 {
 	GameScene::setDefaultValue();
 	ship = new Ship(this);
-	star = new Star(this);
-}
-
-GameScene::~GameScene()
-{
-	delete this->ship;
-	delete this->star;
 }
 
 Scene* GameScene::createScene()
@@ -48,7 +41,7 @@ bool GameScene::init()
 	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::onContactBegin, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(contactListener, this);
 
-	this->addChild(scoreLabel, 2);
+	this->addChild(scoreLabel, 3);
 	this->setParallaxBackground();
 	this->scheduleUpdate();
 	return true;
@@ -107,42 +100,10 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 		this->meteorCollision(bSprite);
 		this->bulletCollision(bSprite);
 	}
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP && b->getCollisionBitmask() == COLLISION_STAR_BRONZE)
-	{
-		GameScene::incrementScore(10);
-		bSprite->removeFromParentAndCleanup(true);
-		star->removeStar(bSprite);
-	}
-	else if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR_BRONZE && b->getCollisionBitmask() == COLLISION_SHIP)
-	{
-		GameScene::incrementScore(10);
-		aSprite->removeFromParentAndCleanup(true);
-		star->removeStar(aSprite);
-	}
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP && b->getCollisionBitmask() == COLLISION_STAR_SILVER)
-	{
-		GameScene::incrementScore(50);
-		bSprite->removeFromParentAndCleanup(true);
-		star->removeStar(bSprite);
-	}
-	else if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR_SILVER && b->getCollisionBitmask() == COLLISION_SHIP)
-	{
-		GameScene::incrementScore(50);
-		aSprite->removeFromParentAndCleanup(true);
-		star->removeStar(aSprite);
-	}
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP && b->getCollisionBitmask() == COLLISION_STAR_GOLD)
-	{
-		GameScene::incrementScore(100);
-		bSprite->removeFromParentAndCleanup(true);
-		star->removeStar(bSprite);
-	}
-	else if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR_GOLD && b->getCollisionBitmask() == COLLISION_SHIP)
-	{
-		GameScene::incrementScore(100);
-		aSprite->removeFromParentAndCleanup(true);
-		star->removeStar(aSprite);
-	}
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR && b->getCollisionBitmask() == COLLISION_SHIP)
+		this->starCollision(aSprite);
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_STAR && a->getCollisionBitmask() == COLLISION_SHIP)
+		this->starCollision(bSprite);
 	return true;
 }
 
@@ -151,8 +112,12 @@ void GameScene::shipCollision(Sprite *ship)
 	this->ship->reduceLife();
 	if (this->ship->getLife() <= 0)
 	{
-		this->goToGameOverScene();
-		CCLOG("GAME OVER !");
+		this->ship->displayExplosion(this);
+		this->ship->getSprite()->removeFromParentAndCleanup(true);
+		this->getEventDispatcher()->removeAllEventListeners();
+		this->unscheduleAllCallbacks();
+		delete this->ship;
+		this->schedule(schedule_selector(GameScene::goToGameOverScene), 2.0f);
 	}
 }
 
@@ -165,7 +130,8 @@ void GameScene::meteorCollision(Sprite *meteor)
 			this->meteorArray[i]->reduceLife();
 			if (this->meteorArray[i]->getLife() <= 0)
 			{
-				this->spawnStar(this->meteorArray[i]->getType(), this->meteorArray[i]->getPosition());
+				this->meteorArray[i]->displayExplosion(this);
+				starArray.push_back(new Star(this, this->meteorArray[i]->getPosition(), this->meteorArray[i]->getType()));
 				this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
 				delete this->meteorArray[i];
 				this->meteorArray.erase(this->meteorArray.begin() + i);
@@ -188,14 +154,25 @@ void GameScene::bulletCollision(Sprite *bullet)
 	}
 }
 
-void GameScene::spawnStar(int type, Point pos)
+void GameScene::starCollision(Sprite *star)
 {
-	if (type == 1)
-		this->star->spawnStarBronze(pos);
-	else if (type == 2)
-		this->star->spawnStarSilver(pos);
-	else if (type == 3)
-		this->star->spawnStarGold(pos);
+	for (unsigned int i = 0; i < this->starArray.size(); ++i)
+	{
+		if (this->starArray[i]->getSprite() == star)
+		{
+			auto type = this->starArray[i]->getType();
+			if (type == 1)
+				GameScene::incrementScore(10);
+			else if (type == 2)
+				GameScene::incrementScore(50);
+			else if (type == 3)
+				GameScene::incrementScore(100);
+			this->starArray[i]->displayStarEffect(this);
+			this->starArray[i]->getSprite()->removeFromParentAndCleanup(true);
+			delete this->starArray[i];
+			this->starArray.erase(this->starArray.begin() + i);
+		}
+	}
 }
 
 void GameScene::meteorUpdate()
@@ -224,6 +201,19 @@ void GameScene::bulletUpdate()
 	}
 }
 
+void GameScene::starUpdate()
+{
+	for (unsigned int i = 0; i < this->starArray.size(); ++i)
+	{
+		if (this->starArray[i]->getPositionY() < origin.y)
+		{
+			this->starArray[i]->getSprite()->removeFromParentAndCleanup(true);
+			delete this->starArray[i];
+			this->starArray.erase(this->starArray.begin() + i);
+		}
+	}
+}
+
 void GameScene::update(float delta)
 {
 	this->timerMeteor += delta;
@@ -232,6 +222,7 @@ void GameScene::update(float delta)
 		this->timerMeteor = 0;
 		meteorArray.push_back(new Meteor(this));
 		this->meteorUpdate();
+		this->starUpdate();
 	}
 	this->timerBullet += delta;
 	if (this->timerBullet > GameScene::frequencyBullet * this->visibleSize.width)
@@ -240,17 +231,15 @@ void GameScene::update(float delta)
 		bulletArray.push_back(new Bullet(this, this->ship->getPosition(), this->ship->getType()));
 		this->bulletUpdate();
 	}
-
-	this->star->update(delta);
 	this->scoreLabel->setString(std::to_string(GameScene::scorePoints));
 	this->parallaxBg->updateWithVelocity(Point(0, GameScene::speedBackground * visibleSize.height), delta);
-	GameScene::setDifficulty();
+	GameScene::scaleDifficulty(this);
 }
 
-void GameScene::goToGameOverScene()
+void GameScene::goToGameOverScene(float delta)
 {
 	auto scene = GameOverScene::createScene();
-	Director::getInstance()->replaceScene(TransitionMoveInT::create(DELAY_TRANSITION, scene));
+	Director::getInstance()->replaceScene(TransitionFade::create(DELAY_TRANSITION, scene));
 }
 
 void GameScene::incrementScore(int value)
@@ -258,14 +247,14 @@ void GameScene::incrementScore(int value)
 	scorePoints += value;
 }
 
-void GameScene::setDifficulty()
+void GameScene::scaleDifficulty(Layer *layer)
 {
 	if (GameScene::scorePoints > 100 && GameScene::scorePoints < 500)
 	{
 		GameScene::speedMeteor = 0.004f;
 		GameScene::speedBackground = -0.02f;
 		GameScene::frequencyMeteor = 0.0009f;
-	} 
+	}
 	else if (GameScene::scorePoints > 500 && GameScene::scorePoints < 1000)
 	{
 		GameScene::speedMeteor = 0.003f;
@@ -280,7 +269,7 @@ void GameScene::setDifficulty()
 	}
 	else if (GameScene::scorePoints > 2000)
 	{
-		GameScene::speedMeteor = 0.001f;
+		GameScene::speedMeteor = 0.0015f;
 		GameScene::speedBackground = -0.05f;
 		GameScene::frequencyMeteor = 0.0006f;
 	}

@@ -13,40 +13,36 @@ USING_NS_CC;
 class GameScene : public Layer
 {
 private:
-	Size visibleSize;
 	Point origin;
+	Size visibleSize;
 	PhysicsWorld *sceneWorld;
 	CCParallaxScrollNode *parallaxBg;
-	Ship *ship;
-	
 	Label *scoreLabel;
 	float timerMeteor;
 	float timerBullet;
-
-	Star *star;
+	Ship *ship;
 	std::vector<Meteor *> meteorArray;
 	std::vector<Bullet *> bulletArray;
+	std::vector<Star *> starArray;
 public:
 	GameScene();
-	~GameScene();
+	~GameScene() {}
 public:
 	static Scene *createScene();
 	virtual bool init();
 	virtual void update(float delta);
 	CREATE_FUNC(GameScene);
-
 	void setPhysicsWorld(PhysicsWorld *world);
 	void setParallaxBackground();
 	bool onContactBegin(PhysicsContact &contact);
 	void shipCollision(Sprite *ship);
 	void meteorCollision(Sprite *meteor);
 	void bulletCollision(Sprite *bullet);
+	void starCollision(Sprite *star);
 	void bulletUpdate();
 	void meteorUpdate();
-	
-	void spawnStar(int type, Point pos);
-	void goToGameOverScene();
-
+	void starUpdate();
+	void goToGameOverScene(float delta);
 	static int scorePoints;
 	static float speedBullet;
 	static float speedMeteor;
@@ -54,7 +50,7 @@ public:
 	static float frequencyMeteor;
 	static float frequencyBullet;
 	static void incrementScore(int value);
-	static void setDifficulty();
+	static void scaleDifficulty(Layer *layer);
 	static void setDefaultValue();
 };
 

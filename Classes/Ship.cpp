@@ -22,20 +22,11 @@ Ship::Ship(Layer *layer)
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
 	this->sprite->setPosition(Point(this->visibleSize.width / 2 + this->origin.x, this->visibleSize.height / 4 + this->origin.y));
-	
-	/*auto shield = Sprite::create("Effects/shield1.png");
-	shield->setPosition(Point(shipSprite->getContentSize().width / 2, shipSprite->getContentSize().height / 2));
-	shipSprite->addChild(shield, 1);*/
 
-	/*auto speed = Sprite::create("Effects/fire13.png");
+	auto speed = Sprite::create("Effects/fire13.png");
 	speed->setAnchorPoint(Point(0.5, 1));
-	speed->setPosition(Point(shipSprite->getContentSize().width / 2, 0));
-	shipSprite->addChild(speed, 1);*/
-
-	/*auto emitter = ParticleSystemQuad::create("Effects/firejet.plist");
-	emitter->setDuration(ParticleSystem::DURATION_INFINITY);
-	emitter->setPosition(shipSprite->getContentSize().width / 2, -10);
-	shipSprite->addChild(emitter, 1);*/
+	speed->setPosition(Point(this->width / 2, 0));
+	this->sprite->addChild(speed, 1);
 
 	this->body = PhysicsBody::createCircle((this->width * 0.75) / 2);
 	this->body->setCollisionBitmask(COLLISION_SHIP);
@@ -53,8 +44,7 @@ Ship::Ship(Layer *layer)
 	listener->onTouchesEnded = CC_CALLBACK_2(Ship::onTouchesEnded, this);
 	listener->onTouchesCancelled = CC_CALLBACK_2(Ship::onTouchesEnded, this);
 	layer->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, layer);
-
-	layer->addChild(this->sprite, 1);
+	layer->addChild(this->sprite, 2);
 }
 
 int Ship::getType() const
@@ -110,13 +100,15 @@ void Ship::displayLife(Layer *layer, int shipIndex)
 	this->lifeOne->setPosition(Point(width + this->origin.x, this->visibleSize.height - height + this->origin.x));
 	this->lifeTwo->setPosition(Point(width * 2 + this->origin.x, this->visibleSize.height - height + this->origin.x));
 	this->lifeThree->setPosition(Point(width * 3 + this->origin.x, this->visibleSize.height - height + this->origin.x));
-	layer->addChild(this->lifeOne, 2);
-	layer->addChild(this->lifeTwo, 2);
-	layer->addChild(this->lifeThree, 2);
+	layer->addChild(this->lifeOne, 3);
+	layer->addChild(this->lifeTwo, 3);
+	layer->addChild(this->lifeThree, 3);
 }
 
 void Ship::reduceLife()
 {
+	auto shipBlink = Blink::create(0.5, 5);
+	this->sprite->runAction(shipBlink);
 	this->life--;
 	if (this->life == 3)
 	{
@@ -175,6 +167,14 @@ void Ship::showDamageThree()
 		damage = Sprite::create("Damage/playerShip3_damage3.png");
 	damage->setPosition(Point(this->width / 2, this->height / 2));
 	this->sprite->addChild(damage, 2);
+}
+
+void Ship::displayExplosion(Layer *layer)
+{
+	auto shipExplosion = ParticleSystemQuad::create("Particles/shipExplosion.plist");
+	shipExplosion->setPosition(this->getPosition());
+	shipExplosion->setAutoRemoveOnFinish(true);
+	layer->addChild(shipExplosion, 2);
 }
 
 Point Ship::touchToPoint(Touch* touch)

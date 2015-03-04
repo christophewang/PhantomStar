@@ -15,7 +15,8 @@ Bullet::Bullet(Layer *layer, Point pos, int type)
 		this->sprite = Sprite::create("Lasers/laser2.png");
 	else if (type == 3)
 		this->sprite = Sprite::create("Lasers/laser3.png");
-	this->sprite->setScaleY(2);
+
+	this->sprite->setScaleY(1.5);
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
 	this->sprite->setPosition(Point(pos.x, pos.y + height));
@@ -25,24 +26,21 @@ Bullet::Bullet(Layer *layer, Point pos, int type)
 	this->body->setCollisionBitmask(COLLISION_BULLET);
 	this->body->setContactTestBitmask(true);
 	this->body->setRotationEnable(false);
+	this->body->setGravityEnable(false);
 	this->sprite->setPhysicsBody(this->body);
 
 	auto bulletMoveTo = MoveTo::create(GameScene::speedBullet * visibleSize.height, 
 		Point(pos.x + origin.x, this->height * 2 + visibleSize.height + origin.y));
 	this->sprite->runAction(bulletMoveTo);
-
-	layer->addChild(this->sprite);
+	layer->addChild(this->sprite, 2);
 }
 
 void Bullet::displayBulletImpact(Layer *layer)
 {
-	auto animation = Animation::create();
-	animation->addSpriteFrameWithFile("Lasers/laserImpact1.png");
-	animation->addSpriteFrameWithFile("Lasers/laserImpact2.png");
-	animation->setDelayPerUnit(0.1);
-	auto animate = Animate::create(animation);
-	this->sprite->runAction(animate);
-	layer->addChild(sprite, 1);
+	auto bulletCollision = ParticleSystemQuad::create("Particles/bulletCollision.plist");
+	bulletCollision->setPosition(this->getPosition());
+	bulletCollision->setAutoRemoveOnFinish(true);
+	layer->addChild(bulletCollision, 2); 
 }
 
 int Bullet::getType() const

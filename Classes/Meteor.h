@@ -15,6 +15,7 @@ public:
 public:
 	int getLife() const;
 	void reduceLife();
+	void displayExplosion(Layer *layer);
 	virtual int getType() const;
 	virtual float getWidth() const;
 	virtual float getHeight() const;

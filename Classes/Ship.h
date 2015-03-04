@@ -25,6 +25,7 @@ public:
 	void showDamageOne();
 	void showDamageTwo();
 	void showDamageThree();
+	void displayExplosion(Layer *layer);
 	Point touchToPoint(Touch* touch);
 	void onTouchesBegan(const std::vector<Touch*>& touches, Event* event);
 	void onTouchesMoved(const std::vector<Touch*>& touches, Event* event);
