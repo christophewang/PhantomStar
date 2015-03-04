@@ -1,0 +1,26 @@
+#pragma once
+#include "cocos2d.h"
+
+USING_NS_CC;
+
+class Entity
+{
+protected:
+	int type;
+	float width;
+	float height;
+	Sprite *sprite;
+	PhysicsBody *body;
+public:
+	Entity();
+	virtual ~Entity();
+public:
+	virtual int getType() const = 0;
+	virtual float getWidth() const = 0;
+	virtual float getHeight() const = 0;
+	virtual Sprite* getSprite() const = 0;
+	virtual Point getPosition() const = 0;
+	virtual float getPositionX() const = 0;
+	virtual float getPositionY() const = 0;
+};
+

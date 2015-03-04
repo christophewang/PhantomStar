@@ -1,26 +1,25 @@
 #pragma once
 #include "cocos2d.h"
 #include "Definitions.h"
+#include "Entity.h"
 
 USING_NS_CC;
 
-class Meteor
+class Meteor : public Entity
 {
 private:
-	int type;
 	int life;
-	float width;
-	float height;
-	Sprite *sprite;
-	PhysicsBody *body;
 public:
 	Meteor(Layer *layer);
-	~Meteor() {}
-	int getType() const;
+	virtual ~Meteor() {}
+public:
 	int getLife() const;
 	void reduceLife();
-	Point getPosition() const;
-	float getPositionX() const;
-	float getPositionY() const;
-	Sprite *getSprite() const;
+	virtual int getType() const;
+	virtual float getWidth() const;
+	virtual float getHeight() const;
+	virtual cocos2d::Sprite *getSprite() const;
+	virtual Point getPosition() const;
+	virtual float getPositionX() const;
+	virtual float getPositionY() const;
 };

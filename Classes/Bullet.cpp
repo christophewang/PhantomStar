@@ -3,51 +3,79 @@
 
 USING_NS_CC;
 
-Bullet::Bullet(Layer *layer)
+Bullet::Bullet(Layer *layer, Point pos, int type)
 {
-	this->visibleSize = Director::getInstance()->getVisibleSize();
-	this->origin = Director::getInstance()->getVisibleOrigin();
-	this->layer = layer;
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	auto origin = Director::getInstance()->getVisibleOrigin();
+	this->type = type;
+
+	if (this->type == 1)
+		this->sprite = Sprite::create("Lasers/laser1.png");
+	else if (this->type == 2)
+		this->sprite = Sprite::create("Lasers/laser2.png");
+	else if (type == 3)
+		this->sprite = Sprite::create("Lasers/laser3.png");
+	this->sprite->setScaleY(2);
+	this->width = this->sprite->getContentSize().width;
+	this->height = this->sprite->getContentSize().height;
+	this->sprite->setPosition(Point(pos.x, pos.y + height));
+
+	this->body = PhysicsBody::createBox(this->sprite->getContentSize());
+
+	this->body->setCollisionBitmask(COLLISION_BULLET);
+	this->body->setContactTestBitmask(true);
+	this->body->setRotationEnable(false);
+	this->sprite->setPhysicsBody(this->body);
+
+	auto bulletMoveTo = MoveTo::create(GameScene::speedBullet * visibleSize.height, 
+		Point(pos.x + origin.x, this->height * 2 + visibleSize.height + origin.y));
+	this->sprite->runAction(bulletMoveTo);
+
+	layer->addChild(this->sprite);
 }
 
-Bullet::~Bullet()
+void Bullet::displayBulletImpact(Layer *layer)
 {
+	auto animation = Animation::create();
+	animation->addSpriteFrameWithFile("Lasers/laserImpact1.png");
+	animation->addSpriteFrameWithFile("Lasers/laserImpact2.png");
+	animation->setDelayPerUnit(0.1);
+	auto animate = Animate::create(animation);
+	this->sprite->runAction(animate);
+	layer->addChild(sprite, 1);
 }
 
-void Bullet::fireBullet(Vec2 shipPosition)
+int Bullet::getType() const
 {
-	auto bulletSprite = Sprite::create("Lasers/laserRed01.png");
-
-	bulletSprite->setScaleY(2);
-	bulletSprite->setPosition(Point(shipPosition.x, shipPosition.y + bulletSprite->getContentSize().height));
-	
-	auto bulletBody = PhysicsBody::createBox(bulletSprite->getContentSize());
-
-	bulletBody->setCollisionBitmask(COLLISION_BULLET);
-	bulletBody->setContactTestBitmask(true);
-	bulletBody->setRotationEnable(false);
-	bulletSprite->setPhysicsBody(bulletBody);
-
-	bullets.push_back(bulletSprite);
-	layer->addChild(bulletSprite);
-	auto bulletMoveBy = MoveBy::create(GameScene::speedBullet * visibleSize.height, Point(0, visibleSize.height));
-	bulletSprite->runAction(bulletMoveBy);
+	return this->type;
 }
 
-void Bullet::removeBullet(Sprite *bulletSprite)
+float Bullet::getWidth() const
 {
-	bullets.erase(std::remove(bullets.begin(), bullets.end(), bulletSprite), bullets.end());
+	return this->width;
 }
 
-void Bullet::update(float delta)
+float Bullet::getHeight() const
 {
-	for (unsigned int i = 0; i < bullets.size(); ++i)
-	{
-		if (bullets[i]->getPosition().y > visibleSize.height + origin.y)
-		{
-			bullets[i]->removeFromParentAndCleanup(true);
-			this->removeBullet(bullets[i]);
-		}
-	}
-	//CCLOG("Bullet size: %i", bullets.size());
+	return this->height;
+}
+
+Sprite* Bullet::getSprite() const
+{
+	return this->sprite;
+}
+
+Point Bullet::getPosition() const
+{
+	return this->sprite->getPosition();
+}
+
+float Bullet::getPositionX() const
+{
+	return this->sprite->getPositionX();
+}
+
+float Bullet::getPositionY() const
+{
+	return this->sprite->getPositionY();
 }

@@ -4,11 +4,9 @@
 USING_NS_CC;
 
 Meteor::Meteor(Layer *layer)
-	: type(0), life(0), width(0), height(0), sprite(nullptr), body(nullptr)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
-
 	int meteorIndex = rand() % 8 + 1;
 
 	if (meteorIndex > 0 && meteorIndex <= 4)
@@ -50,7 +48,7 @@ Meteor::Meteor(Layer *layer)
 	auto meteorRotateBy = RotateBy::create(GameScene::speedMeteor * visibleSize.height, 360);
 	this->sprite->runAction(Spawn::createWithTwoActions(meteorRotateBy, meteorMoveTo));
 
-	layer->addChild(this->sprite);
+	layer->addChild(this->sprite, 1);
 }
 
 int Meteor::getType() const
@@ -63,9 +61,19 @@ int Meteor::getLife() const
 	return this->life;
 }
 
-void Meteor::reduceLife()
+float Meteor::getWidth() const
 {
-	this->life--;
+	return this->width;
+}
+
+float Meteor::getHeight() const
+{
+	return this->height;
+}
+
+Sprite* Meteor::getSprite() const
+{
+	return this->sprite;
 }
 
 Point Meteor::getPosition() const
@@ -83,7 +91,7 @@ float Meteor::getPositionY() const
 	return this->sprite->getPositionY();
 }
 
-Sprite* Meteor::getSprite() const
+void Meteor::reduceLife()
 {
-	return this->sprite;
+	this->life--;
 }
