@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __ENTITY_H__
+#define __ENTITY_H__
+
 #include "cocos2d.h"
 
 USING_NS_CC;
@@ -13,7 +15,7 @@ protected:
 	PhysicsBody *body;
 public:
 	Entity();
-	virtual ~Entity();
+	virtual ~Entity() {}
 public:
 	virtual int getType() const = 0;
 	virtual float getWidth() const = 0;
@@ -24,3 +26,4 @@ public:
 	virtual float getPositionY() const = 0;
 };
 
+#endif // __ENTITY_H__

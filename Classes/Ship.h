@@ -1,27 +1,31 @@
-#pragma once
+#ifndef __SHIP_H__
+#define __SHIP_H__
+
 #include "cocos2d.h"
 #include "Definitions.h"
 #include "Entity.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
 class Ship : public Entity
 {
 private:
-	int life;
 	Size visibleSize;
 	Point origin;
-	Point touchOffset;
+	int life;
 	Sprite *lifeOne;
 	Sprite *lifeTwo;
 	Sprite *lifeThree;
+	Point touchOffset;
 public:
 	Ship(Layer *layer);
 	virtual ~Ship() {}
 public:
 	int getLife() const;
 	void displayLife(Layer *layer, int shipIndex);
-	void reduceLife();
+	void reduceLife(Layer *layer);
+	void scalingEffect();
 	void showDamageOne();
 	void showDamageTwo();
 	void showDamageThree();
@@ -38,3 +42,5 @@ public:
 	virtual float getPositionX() const;
 	virtual float getPositionY() const;
 };
+
+#endif // __SHIP_H__

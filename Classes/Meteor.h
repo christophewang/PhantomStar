@@ -1,7 +1,10 @@
-#pragma once
+#ifndef __METEOR_H__
+#define __METEOR_H__
+
 #include "cocos2d.h"
 #include "Definitions.h"
 #include "Entity.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
@@ -11,6 +14,7 @@ private:
 	int life;
 public:
 	Meteor(Layer *layer);
+	Meteor(Layer *layer, float speed);
 	virtual ~Meteor() {}
 public:
 	int getLife() const;
@@ -24,3 +28,5 @@ public:
 	virtual float getPositionX() const;
 	virtual float getPositionY() const;
 };
+
+#endif // __METEOR_H__

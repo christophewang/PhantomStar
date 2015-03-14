@@ -1,19 +1,24 @@
 #include "GameScene.h"
 
-USING_NS_CC;
-
 int GameScene::scorePoints = 0;
-float GameScene::speedBullet = 0.001f;
-float GameScene::speedMeteor = 0.005f;
-float GameScene::speedBackground = -0.01f;
-float GameScene::frequencyMeteor = 0.001f;
-float GameScene::frequencyBullet = 0.0005f;
+int GameScene::backgroundType = 1;
+float GameScene::speedBullet = 0.0f;
+float GameScene::speedMeteor = 0.0f;
+float GameScene::speedBackground = 0.0f;
+float GameScene::frequencyMeteor = 0.0f;
+float GameScene::frequencyBullet = 0.0f;
 
 GameScene::GameScene()
 	: timerMeteor(0), timerBullet(0)
 {
 	GameScene::setDefaultValue();
+	def = UserDefault::getInstance();
 	ship = new Ship(this);
+}
+
+GameScene::~GameScene()
+{
+	delete this->ship;
 }
 
 Scene* GameScene::createScene()
@@ -21,7 +26,8 @@ Scene* GameScene::createScene()
 	auto scene = Scene::createWithPhysics();
 	auto layer = GameScene::create();
 
-	layer->setPhysicsWorld(scene->getPhysicsWorld());
+	layer->sceneWorld = scene->getPhysicsWorld();
+	/* Debug Mode */
 	//scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 	scene->addChild(layer);
 	return scene;
@@ -33,31 +39,68 @@ bool GameScene::init()
 		return false;
 	visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
-	scoreLabel = Label::createWithTTF(std::to_string(GameScene::scorePoints), "Fonts/kenvector_future_thin.ttf", visibleSize.height / 15);
+
+	std::stringstream score;
+	score << GameScene::scorePoints;
+	scoreLabel = Label::createWithTTF(score.str(), FONT, visibleSize.height / 15);
 	scoreLabel->setAlignment(TextHAlignment::CENTER);
-	scoreLabel->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height - visibleSize.height / 15 + origin.y));
+	scoreLabel->setPosition(Point(visibleSize.width / 2 + origin.x,
+		visibleSize.height - visibleSize.height / 15 + origin.y));
+
+	soundBGMButton = ui::Button::create();
+	this->checkBGMSettings();
+	soundBGMButton->setPosition(Point(visibleSize.width - soundBGMButton->getContentSize().width / 2 + origin.x,
+		visibleSize.height - soundBGMButton->getContentSize().height / 2 + origin.y));
+	soundBGMButton->addTouchEventListener(CC_CALLBACK_2(GameScene::BGMListener, this));
 
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::onContactBegin, this);
-	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(contactListener, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(contactListener, this);
 
-	this->addChild(scoreLabel, 3);
+	auto keybackListener = EventListenerKeyboard::create();
+	keybackListener->onKeyReleased = CC_CALLBACK_2(GameScene::onKeyReleased, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(keybackListener, this);
+
 	this->setParallaxBackground();
 	this->scheduleUpdate();
+	this->addChild(soundBGMButton, 3);
+	this->addChild(scoreLabel, 3);
 	return true;
 }
 
-void GameScene::setPhysicsWorld(PhysicsWorld *world)
+void GameScene::checkBGMSettings()
 {
-	this->sceneWorld = world;
+	if (!def->getBoolForKey(BGM_KEY, false))
+	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_BACKGROUND, true);
+		soundBGMButton->loadTextures(MUSIC_ON, MUSIC_ON);
+	}
+	else
+		soundBGMButton->loadTextures(MUSIC_OFF, MUSIC_OFF);
+}
+
+void GameScene::BGMListener(Ref *Sender, ui::Widget::TouchEventType type)
+{
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		if (!def->getBoolForKey(BGM_KEY, false))
+		{
+			def->setBoolForKey(BGM_KEY, true);
+			soundBGMButton->loadTextures(MUSIC_OFF, MUSIC_OFF);
+			CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic(true);
+		}
+		else
+		{
+			def->setBoolForKey(BGM_KEY, false);
+			soundBGMButton->loadTextures(MUSIC_ON, MUSIC_ON);
+			CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_BACKGROUND, true);
+		}
+	}
 }
 
 void GameScene::setParallaxBackground()
 {
-	std::srand(time(NULL));
-	int backgroundIndex = rand() % 4 + 1;
-
-	__String *backgroundString = __String::createWithFormat("Backgrounds/background%i.png", backgroundIndex);
+	__String *backgroundString = __String::createWithFormat(BACKGROUND, GameScene::backgroundType);
 	auto bg1 = Sprite::create(backgroundString->getCString());
 	auto bg2 = Sprite::create(backgroundString->getCString());
 
@@ -109,15 +152,14 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 
 void GameScene::shipCollision(Sprite *ship)
 {
-	this->ship->reduceLife();
+	this->ship->reduceLife(this);
 	if (this->ship->getLife() <= 0)
 	{
 		this->ship->displayExplosion(this);
 		this->ship->getSprite()->removeFromParentAndCleanup(true);
 		this->getEventDispatcher()->removeAllEventListeners();
 		this->unscheduleAllCallbacks();
-		delete this->ship;
-		this->schedule(schedule_selector(GameScene::goToGameOverScene), 2.0f);
+		this->schedule(schedule_selector(GameScene::displayGameOver), 2.0f);
 	}
 }
 
@@ -217,7 +259,7 @@ void GameScene::starUpdate()
 void GameScene::update(float delta)
 {
 	this->timerMeteor += delta;
-	if (this->timerMeteor > GameScene::frequencyMeteor * this->visibleSize.width)
+	if (this->timerMeteor > GameScene::frequencyMeteor / this->visibleSize.width)
 	{
 		this->timerMeteor = 0;
 		meteorArray.push_back(new Meteor(this));
@@ -225,21 +267,17 @@ void GameScene::update(float delta)
 		this->starUpdate();
 	}
 	this->timerBullet += delta;
-	if (this->timerBullet > GameScene::frequencyBullet * this->visibleSize.width)
+	if (this->timerBullet > GameScene::frequencyBullet / this->visibleSize.height)
 	{
 		this->timerBullet = 0;
 		bulletArray.push_back(new Bullet(this, this->ship->getPosition(), this->ship->getType()));
 		this->bulletUpdate();
 	}
-	this->scoreLabel->setString(std::to_string(GameScene::scorePoints));
+	std::stringstream score;
+	score << GameScene::scorePoints;
+	this->scoreLabel->setString(score.str());
 	this->parallaxBg->updateWithVelocity(Point(0, GameScene::speedBackground * visibleSize.height), delta);
 	GameScene::scaleDifficulty(this);
-}
-
-void GameScene::goToGameOverScene(float delta)
-{
-	auto scene = GameOverScene::createScene();
-	Director::getInstance()->replaceScene(TransitionFade::create(DELAY_TRANSITION, scene));
 }
 
 void GameScene::incrementScore(int value)
@@ -249,29 +287,35 @@ void GameScene::incrementScore(int value)
 
 void GameScene::scaleDifficulty(Layer *layer)
 {
-	if (GameScene::scorePoints > 100 && GameScene::scorePoints < 500)
+	if (GameScene::scorePoints >= 100 && GameScene::scorePoints < 500)
 	{
 		GameScene::speedMeteor = 0.004f;
 		GameScene::speedBackground = -0.02f;
-		GameScene::frequencyMeteor = 0.0009f;
+		GameScene::frequencyMeteor = 180.0f;
 	}
-	else if (GameScene::scorePoints > 500 && GameScene::scorePoints < 1000)
+	else if (GameScene::scorePoints >= 500 && GameScene::scorePoints < 1000)
 	{
 		GameScene::speedMeteor = 0.003f;
 		GameScene::speedBackground = -0.03f;
-		GameScene::frequencyMeteor = 0.0008f;
+		GameScene::frequencyMeteor = 160.0f;
 	}
-	else if (GameScene::scorePoints > 1000 && GameScene::scorePoints < 2000)
+	else if (GameScene::scorePoints >= 1000 && GameScene::scorePoints < 2000)
 	{
 		GameScene::speedMeteor = 0.002f;
 		GameScene::speedBackground = -0.04f;
-		GameScene::frequencyMeteor = 0.0007f;
+		GameScene::frequencyMeteor = 130.0f;
 	}
-	else if (GameScene::scorePoints > 2000)
+	else if (GameScene::scorePoints >= 2000 && GameScene::scorePoints < 4000)
 	{
 		GameScene::speedMeteor = 0.0015f;
 		GameScene::speedBackground = -0.05f;
-		GameScene::frequencyMeteor = 0.0006f;
+		GameScene::frequencyMeteor = 100.0f;
+	}
+	else if (GameScene::scorePoints >= 4000)
+	{
+		GameScene::speedMeteor = 0.001f;
+		GameScene::speedBackground = -0.05f;
+		GameScene::frequencyMeteor = 80.0f;
 	}
 }
 
@@ -281,6 +325,35 @@ void GameScene::setDefaultValue()
 	GameScene::speedBullet = 0.001f;
 	GameScene::speedMeteor = 0.005f;
 	GameScene::speedBackground = -0.01f;
-	GameScene::frequencyMeteor = 0.001f;
-	GameScene::frequencyBullet = 0.0005f;
+	GameScene::frequencyMeteor = 190.0f;
+	GameScene::frequencyBullet = 150.0f;
+}
+
+void GameScene::displayGameOver(float delta)
+{
+	this->scoreLabel->setVisible(false);
+	auto gameOverDialog = GameOverDialog::create();
+	this->addChild(gameOverDialog, 4, DIALOG_OBJECT);
+}
+
+void GameScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent)
+{
+	if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
+	{
+		if (!Director::getInstance()->isPaused())
+		{
+			Director::getInstance()->pause();
+			CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+			CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
+			auto gameDialog = GameDialog::create();
+			this->addChild(gameDialog, 4, DIALOG_OBJECT);
+		}
+		else if (Director::getInstance()->isPaused())
+		{
+			this->removeChildByTag(DIALOG_OBJECT, true);
+			Director::getInstance()->resume();
+			CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+			CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
+		}
+	}
 }

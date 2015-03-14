@@ -1,21 +1,17 @@
 #include "Bullet.h"
 #include "GameScene.h"
 
-USING_NS_CC;
-
 Bullet::Bullet(Layer *layer, Point pos, int type)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
 	this->type = type;
-
 	if (this->type == 1)
-		this->sprite = Sprite::create("Lasers/laser1.png");
+		this->sprite = Sprite::createWithSpriteFrameName(LASER_1);
 	else if (this->type == 2)
-		this->sprite = Sprite::create("Lasers/laser2.png");
+		this->sprite = Sprite::createWithSpriteFrameName(LASER_2);
 	else if (type == 3)
-		this->sprite = Sprite::create("Lasers/laser3.png");
-
+		this->sprite = Sprite::createWithSpriteFrameName(LASER_3);
 	this->sprite->setScaleY(1.5);
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
@@ -32,15 +28,16 @@ Bullet::Bullet(Layer *layer, Point pos, int type)
 	auto bulletMoveTo = MoveTo::create(GameScene::speedBullet * visibleSize.height, 
 		Point(pos.x + origin.x, this->height * 2 + visibleSize.height + origin.y));
 	this->sprite->runAction(bulletMoveTo);
-	layer->addChild(this->sprite, 2);
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHOOT);
+	layer->addChild(this->sprite, 2, GAME_OBJECT);
 }
 
 void Bullet::displayBulletImpact(Layer *layer)
 {
-	auto bulletCollision = ParticleSystemQuad::create("Particles/bulletCollision.plist");
+	auto bulletCollision = ParticleSystemQuad::create(BULLET_COLLISION);
 	bulletCollision->setPosition(this->getPosition());
 	bulletCollision->setAutoRemoveOnFinish(true);
-	layer->addChild(bulletCollision, 2); 
+	layer->addChild(bulletCollision, 2);
 }
 
 int Bullet::getType() const

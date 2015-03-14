@@ -1,7 +1,10 @@
-#pragma once
+#ifndef __STAR_H__
+#define __STAR_H__
+
 #include "cocos2d.h"
 #include "Definitions.h"
 #include "Entity.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
@@ -20,3 +23,5 @@ public:
 	virtual float getPositionX() const;
 	virtual float getPositionY() const;
 };
+
+#endif // __STAR_H__

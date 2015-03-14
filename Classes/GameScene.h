@@ -1,12 +1,18 @@
-#pragma once
+#ifndef __GAMESCENE_H__
+#define __GAMESCENE_H__
+
 #include "cocos2d.h"
 #include "Meteor.h"
 #include "Bullet.h"
 #include "Ship.h"
 #include "Star.h"
-#include "GameOverScene.h"
+#include "MainMenuScene.h"
 #include "Definitions.h"
 #include "CCParallaxScrollNode.h"
+#include "ui/CocosGUI.h"
+#include "SimpleAudioEngine.h"
+#include "GameDialog.h"
+#include "GameOverDialog.h"
 
 USING_NS_CC;
 
@@ -24,16 +30,23 @@ private:
 	std::vector<Meteor *> meteorArray;
 	std::vector<Bullet *> bulletArray;
 	std::vector<Star *> starArray;
+	ui::Button *soundBGMButton;
+	UserDefault *def;
 public:
 	GameScene();
-	~GameScene() {}
+	~GameScene();
 public:
 	static Scene *createScene();
 	virtual bool init();
 	virtual void update(float delta);
+	virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent);
 	CREATE_FUNC(GameScene);
-	void setPhysicsWorld(PhysicsWorld *world);
+
+	void checkBGMSettings();
+	void BGMListener(Ref *sender, ui::Widget::TouchEventType type);
 	void setParallaxBackground();
+	void displayGameOver(float delta);
+
 	bool onContactBegin(PhysicsContact &contact);
 	void shipCollision(Sprite *ship);
 	void meteorCollision(Sprite *meteor);
@@ -42,8 +55,10 @@ public:
 	void bulletUpdate();
 	void meteorUpdate();
 	void starUpdate();
-	void goToGameOverScene(float delta);
+	
+	/* Static Game Proprieties */
 	static int scorePoints;
+	static int backgroundType;
 	static float speedBullet;
 	static float speedMeteor;
 	static float speedBackground;
@@ -54,3 +69,4 @@ public:
 	static void setDefaultValue();
 };
 
+#endif // __GAMESCENE_H__

@@ -1,14 +1,9 @@
 #include "MainMenuScene.h"
-#include "Definitions.h"
-#include "GameScene.h"
-
-USING_NS_CC;
 
 Scene* MainMenuScene::createScene()
 {
 	auto scene = Scene::create();
 	auto layer = MainMenuScene::create();
-
 	scene->addChild(layer);
 	return scene;
 }
@@ -17,24 +12,115 @@ bool MainMenuScene::init()
 {
 	if (!Layer::init())
 		return false;
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	timer = 0.0f;
+	visibleSize = Director::getInstance()->getVisibleSize();
+	origin = Director::getInstance()->getVisibleOrigin();
 
-	auto backgroundSprite = Sprite::create("Backgrounds/menu.png");
-	backgroundSprite->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-	this->addChild(backgroundSprite);
+	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	CocosDenshion::SimpleAudioEngine::getInstance()->stopAllEffects();
 
-	auto playButton = MenuItemImage::create("UI/playButton.png", "UI/playButtonClicked.png", CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
-	playButton->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	auto menu = CSLoader::createNode(GAME_MENU);
+	menu->setAnchorPoint(Point(0.5, 0.5));
+	menu->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-	auto menu = Menu::create(playButton, NULL);
-	menu->setPosition(Point::ZERO);
-	this->addChild(menu);
+	ui::Button *playButton = static_cast<ui::Button*>(menu->getChildByName("playButton"));
+	playButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
+
+	ui::Button *rateButton = static_cast<ui::Button*>(menu->getChildByName("rateButton"));
+	rateButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::rate, this));
+
+	ui::Button *rankingButton = static_cast<ui::Button*>(menu->getChildByName("rankingButton"));
+	rankingButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::ranking, this));
+
+	ui::Button *donationButton = static_cast<ui::Button*>(menu->getChildByName("donationButton"));
+	donationButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::donation, this));
+
+	auto keybackListener = EventListenerKeyboard::create();
+	keybackListener->onKeyReleased = CC_CALLBACK_2(MainMenuScene::onKeyReleased, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(keybackListener, this);
+
+	this->setParallaxBackground();
+	this->scheduleUpdate();
+	this->addChild(menu, 4);
 	return true;
+}
+
+void MainMenuScene::setParallaxBackground()
+{
+	std::srand(time(NULL));
+
+	GameScene::backgroundType = rand() % 4 + 1;
+	__String *backgroundString = __String::createWithFormat(BACKGROUND, GameScene::backgroundType);
+
+	auto bg1 = Sprite::create(backgroundString->getCString());
+	auto bg2 = Sprite::create(backgroundString->getCString());
+
+	bg1->getTexture()->setTexParameters({ GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT });
+	bg1->setTextureRect(Rect(0, 0, visibleSize.width, visibleSize.height));
+	bg2->setTextureRect(Rect(0, 0, visibleSize.width, visibleSize.height));
+
+	parallaxBg = CCParallaxScrollNode::create();
+	parallaxBg->addInfiniteScrollYWithZ(-1, Point(1, 1), Point(0, 0), bg1, bg2, NULL);
+
+	this->addChild(parallaxBg, 1);
+}
+
+void MainMenuScene::meteorUpdate()
+{
+	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
+	{
+		if (this->meteorArray[i]->getPositionY() < origin.y)
+		{
+			this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
+			delete this->meteorArray[i];
+			this->meteorArray.erase(this->meteorArray.begin() + i);
+		}
+	}
+}
+
+void MainMenuScene::update(float delta)
+{
+	this->timer += delta;
+	if (this->timer > 200.0f / this->visibleSize.width)
+	{
+		this->timer = 0;
+		meteorArray.push_back(new Meteor(this, 0.002f));
+		this->meteorUpdate();
+	}
+	this->parallaxBg->updateWithVelocity(Point(0, -0.01f * visibleSize.height), delta);
 }
 
 void MainMenuScene::goToGameScene(Ref* sender)
 {
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_CLICK);
+	this->removeFromParentAndCleanup(true);
 	auto scene = GameScene::createScene();
 	Director::getInstance()->replaceScene(TransitionSlideInB::create(DELAY_TRANSITION, scene));
 }
+
+void MainMenuScene::rate(Ref *sender)
+{
+	//TODO Rate link to Play Store
+}
+
+void MainMenuScene::ranking(Ref *sender)
+{
+	//TODO Ranking link to Google Play
+}
+
+void MainMenuScene::donation(Ref *sender)
+{
+	//TODO IAP Link donation
+}
+
+void MainMenuScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent)
+{
+	if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
+	{
+		_eventDispatcher->removeAllEventListeners();
+		this->removeFromParentAndCleanup(true);
+		Director::getInstance()->getOpenGLView()->end();
+		Director::getInstance()->end();
+	}
+}
+
