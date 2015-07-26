@@ -6,15 +6,15 @@
 #include "SimpleAudioEngine.h"
 #include "MainMenuScene.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class AppDelegate : private Application
 {
 public:
-    virtual void initGLContextAttrs();
-    virtual bool applicationDidFinishLaunching();
-    virtual void applicationDidEnterBackground();
-    virtual void applicationWillEnterForeground();
+	virtual void initGLContextAttrs() override;
+	virtual bool applicationDidFinishLaunching() override;
+	virtual void applicationDidEnterBackground() override;
+	virtual void applicationWillEnterForeground() override;
 };
 
 #endif // __APPDELEGATE_H__

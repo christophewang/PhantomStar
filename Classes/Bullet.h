@@ -2,11 +2,9 @@
 #define __BULLET_H__
 
 #include "cocos2d.h"
-#include "Definitions.h"
 #include "Entity.h"
-#include "SimpleAudioEngine.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class Bullet : public Entity
 {
@@ -15,13 +13,13 @@ public:
 	virtual ~Bullet() {}
 public:
 	void displayBulletImpact(Layer *layer);
-	virtual int getType() const;
-	virtual float getWidth() const;
-	virtual float getHeight() const;
-	virtual Sprite* getSprite() const;
-	virtual Point getPosition() const;
-	virtual float getPositionX() const;
-	virtual float getPositionY() const;
+	virtual int getType() const override;
+	virtual float getWidth() const override;
+	virtual float getHeight() const override;
+	virtual Sprite* getSprite() const override;
+	virtual Point getPosition() const override;
+	virtual float getPositionX() const override;
+	virtual float getPositionY() const override;
 };
 
 #endif // __BULLET_H__

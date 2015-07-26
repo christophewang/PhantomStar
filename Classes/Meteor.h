@@ -1,6 +1,7 @@
 #ifndef __METEOR_H__
 #define __METEOR_H__
 
+#include <cstdlib>
 #include "cocos2d.h"
 #include "Definitions.h"
 #include "Entity.h"
@@ -10,17 +11,13 @@ USING_NS_CC;
 
 class Meteor : public Entity
 {
-private:
-	int life;
 public:
 	Meteor(Layer *layer);
 	Meteor(Layer *layer, float speed);
 	virtual ~Meteor() {}
 public:
-	int getLife() const;
-	void reduceLife();
 	void displayExplosion(Layer *layer);
-	virtual int getType() const;
+	virtual int getType() const override;
 	virtual float getWidth() const;
 	virtual float getHeight() const;
 	virtual cocos2d::Sprite *getSprite() const;

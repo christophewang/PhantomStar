@@ -1,13 +1,16 @@
 # Ignore everything
 /*
 /*/
+
+# Ignore configuration
+GooglePlayServices.h
  
 # Inverse ignore 
 !/Classes/
 !/Resources/
 !.gitignore
 !README.md
- 
+
 # OS Stuff
 .DS_Store
 ._*

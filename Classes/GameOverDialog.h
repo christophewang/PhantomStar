@@ -8,6 +8,7 @@
 #include "ui/CocosGUI.h"
 #include "cocostudio/CocoStudio.h"
 #include "SimpleAudioEngine.h"
+#include "NativeUtils.h"
 
 USING_NS_CC;
 

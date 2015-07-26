@@ -1,4 +1,5 @@
 #include "GameOverDialog.h"
+#include "GooglePlayServices.h"
 
 bool GameOverDialog::init()
 {
@@ -45,22 +46,29 @@ void GameOverDialog::setupUI()
 	menuButton->setTouchEnabled(true);
 	menuButton->addTouchEventListener(CC_CALLBACK_2(GameOverDialog::goToMainMenuScene, this));
 	this->addChild(gameOverDialog, 4);
+	/* Google Play Input Score */
+	if (NativeUtils::isSignedIn())
+		NativeUtils::submitScore(RANKING, GameScene::scorePoints);
 }
 
 void GameOverDialog::goToGameScene(Ref *sender, ui::Widget::TouchEventType type)
 {
-	this->removeFromParentAndCleanup(true);
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_CLICK);
-	auto scene = GameScene::createScene();
-	Director::getInstance()->replaceScene(TransitionSlideInB::create(DELAY_TRANSITION, scene));
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		this->removeFromParentAndCleanup(true);
+		auto scene = GameScene::createScene();
+		Director::getInstance()->replaceScene(TransitionSlideInB::create(DELAY_TRANSITION, scene));
+	}
 }
 
 void GameOverDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type)
 {
-	this->removeFromParentAndCleanup(true);
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_CLICK);
-	auto scene = MainMenuScene::createScene();
-	Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		this->removeFromParentAndCleanup(true);
+		auto scene = MainMenuScene::createScene();
+		Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
+	}
 }
 
 int GameOverDialog::checkHighScore()

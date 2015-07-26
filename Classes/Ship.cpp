@@ -46,10 +46,14 @@ Ship::Ship(Layer *layer)
 
 void Ship::displayLife(Layer *layer, int shipIndex)
 {
-	__String *shipLifeString = __String::createWithFormat(SHIP_LIFE, shipIndex);
+	/*__String *shipLifeString = __String::createWithFormat(SHIP_LIFE, shipIndex);
 	this->lifeOne = Sprite::createWithSpriteFrameName(shipLifeString->getCString());
 	this->lifeTwo = Sprite::createWithSpriteFrameName(shipLifeString->getCString());
-	this->lifeThree = Sprite::createWithSpriteFrameName(shipLifeString->getCString());
+	this->lifeThree = Sprite::createWithSpriteFrameName(shipLifeString->getCString());*/
+
+	this->lifeOne = Sprite::createWithSpriteFrameName(RED_PILL);
+	this->lifeTwo = Sprite::createWithSpriteFrameName(RED_PILL);
+	this->lifeThree = Sprite::createWithSpriteFrameName(RED_PILL);
 
 	float width = this->lifeOne->getContentSize().width;
 	float height = this->lifeOne->getContentSize().height;
@@ -67,10 +71,10 @@ void Ship::reduceLife(Layer *layer)
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_COLLISION);
 
 	//TODO SHIP COLLISION PARTICLE
-	auto bulletCollision = ParticleSystemQuad::create(SHIP_COLLISION);
-	bulletCollision->setPosition(this->getPosition());
-	bulletCollision->setAutoRemoveOnFinish(true);
-	layer->addChild(bulletCollision, 2);
+	auto shipCollision = ParticleSystemQuad::create(SHIP_COLLISION);
+	shipCollision->setPosition(Point(this->getPositionX(), this->getPositionY() - this->getHeight() / 2));
+	shipCollision->setAutoRemoveOnFinish(true);
+	layer->addChild(shipCollision, 2);
 	this->life--;
 	if (this->life == 3)
 	{
@@ -102,7 +106,7 @@ void Ship::scalingEffect()
 
 void Ship::showDamageOne()
 {
-	Sprite *damage;
+	Sprite *damage = nullptr;
 	if (this->type == 1)
 		damage = Sprite::createWithSpriteFrameName(DAMAGE_1_1);
 	else if (this->type == 2)

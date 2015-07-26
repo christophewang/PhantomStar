@@ -1,4 +1,5 @@
 #include "MainMenuScene.h"
+#include "GooglePlayServices.h"
 
 Scene* MainMenuScene::createScene()
 {
@@ -23,17 +24,18 @@ bool MainMenuScene::init()
 	menu->setAnchorPoint(Point(0.5, 0.5));
 	menu->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-	ui::Button *playButton = static_cast<ui::Button*>(menu->getChildByName("playButton"));
-	playButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
+	auto playButton = static_cast<ui::Button*>(menu->getChildByName("playButton"));
+	playButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::goToGameScene, this));
 
-	ui::Button *rateButton = static_cast<ui::Button*>(menu->getChildByName("rateButton"));
-	rateButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::rate, this));
+	auto rateButton = static_cast<ui::Button*>(menu->getChildByName("rateButton"));
+	rateButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::rate, this));
 
-	ui::Button *rankingButton = static_cast<ui::Button*>(menu->getChildByName("rankingButton"));
-	rankingButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::ranking, this));
+	auto rankingButton = static_cast<ui::Button*>(menu->getChildByName("rankingButton"));
+	rankingButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::ranking, this));
 
-	ui::Button *donationButton = static_cast<ui::Button*>(menu->getChildByName("donationButton"));
-	donationButton->addTouchEventListener(CC_CALLBACK_1(MainMenuScene::donation, this));
+	auto donationButton = static_cast<ui::Button*>(menu->getChildByName("donationButton"));
+	donationButton->setVisible(false);
+	donationButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::donation, this));
 
 	auto keybackListener = EventListenerKeyboard::create();
 	keybackListener->onKeyReleased = CC_CALLBACK_2(MainMenuScene::onKeyReleased, this);
@@ -47,10 +49,9 @@ bool MainMenuScene::init()
 
 void MainMenuScene::setParallaxBackground()
 {
-	std::srand(time(NULL));
-
+	std::srand(time(nullptr));
 	GameScene::backgroundType = rand() % 4 + 1;
-	__String *backgroundString = __String::createWithFormat(BACKGROUND, GameScene::backgroundType);
+	auto backgroundString = __String::createWithFormat(BACKGROUND, GameScene::backgroundType);
 
 	auto bg1 = Sprite::create(backgroundString->getCString());
 	auto bg2 = Sprite::create(backgroundString->getCString());
@@ -90,27 +91,40 @@ void MainMenuScene::update(float delta)
 	this->parallaxBg->updateWithVelocity(Point(0, -0.01f * visibleSize.height), delta);
 }
 
-void MainMenuScene::goToGameScene(Ref* sender)
+void MainMenuScene::goToGameScene(Ref* sender, ui::Widget::TouchEventType type)
 {
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_CLICK);
-	this->removeFromParentAndCleanup(true);
-	auto scene = GameScene::createScene();
-	Director::getInstance()->replaceScene(TransitionSlideInB::create(DELAY_TRANSITION, scene));
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		this->removeFromParentAndCleanup(true);
+		auto scene = GameScene::createScene();
+		Director::getInstance()->replaceScene(TransitionSlideInB::create(DELAY_TRANSITION, scene));
+	}
 }
 
-void MainMenuScene::rate(Ref *sender)
+void MainMenuScene::rate(Ref *sender, ui::Widget::TouchEventType type)
 {
-	//TODO Rate link to Play Store
+	if (type == ui::Widget::TouchEventType::BEGAN)
+		Application::getInstance()->openURL(LINK);
 }
 
-void MainMenuScene::ranking(Ref *sender)
+void MainMenuScene::ranking(Ref *sender, ui::Widget::TouchEventType type)
 {
-	//TODO Ranking link to Google Play
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		// Google Play Sign In
+		if (!NativeUtils::isSignedIn())
+			NativeUtils::signIn();
+		if (NativeUtils::isSignedIn())
+			NativeUtils::showLeaderboard(RANKING);
+	}
 }
 
-void MainMenuScene::donation(Ref *sender)
+void MainMenuScene::donation(Ref *sender, ui::Widget::TouchEventType type)
 {
-	//TODO IAP Link donation
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		//TODO IAP Link donation
+	}
 }
 
 void MainMenuScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent)

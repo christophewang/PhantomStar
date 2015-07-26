@@ -42,20 +42,24 @@ void GameDialog::setupUI()
 
 void GameDialog::closeDialog(Ref *sender, ui::Widget::TouchEventType type)
 {
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_CLICK);
-	this->removeFromParentAndCleanup(true);
-	Director::getInstance()->resume();
-	CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-	CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		this->removeFromParentAndCleanup(true);
+		Director::getInstance()->resume();
+		CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+		CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
+	}
 }
 
 void GameDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type)
 {
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_CLICK);
-	this->removeFromParentAndCleanup(true);
-	Director::getInstance()->resume();
-	auto scene = MainMenuScene::createScene();
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHIP_EXPLOSION);
-	Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
+	if (type == ui::Widget::TouchEventType::BEGAN)
+	{
+		this->removeFromParentAndCleanup(true);
+		Director::getInstance()->resume();
+		auto scene = MainMenuScene::createScene();
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHIP_EXPLOSION);
+		Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
+	}
 }
 

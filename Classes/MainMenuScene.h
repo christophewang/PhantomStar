@@ -1,6 +1,7 @@
 #ifndef __MAINMENUSCENE_H__
 #define __MAINMENUSCENE_H__
 
+#include <cstdlib>
 #include "cocos2d.h"
 #include "Definitions.h"
 #include "GameScene.h"
@@ -9,6 +10,7 @@
 #include "SimpleAudioEngine.h"
 #include "ui/CocosGUI.h"
 #include "cocostudio/CocoStudio.h"
+#include "NativeUtils.h"
 
 USING_NS_CC;
 
@@ -29,10 +31,10 @@ public:
 	
 	void meteorUpdate();
 	void setParallaxBackground();
-	void rate(Ref *sender);
-	void ranking(Ref *sender);
-	void donation(Ref *sender);
-	void goToGameScene(Ref* sender);
+	void rate(Ref *sender, ui::Widget::TouchEventType type);
+	void ranking(Ref *sender, ui::Widget::TouchEventType type);
+	void donation(Ref *sender, ui::Widget::TouchEventType type);
+	void goToGameScene(Ref* sender, ui::Widget::TouchEventType type);
 };
 
 #endif // __MAINMENUSCENE_H__

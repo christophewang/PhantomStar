@@ -3,7 +3,7 @@
 
 #include "cocos2d.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class Entity
 {
@@ -14,7 +14,7 @@ protected:
 	Sprite *sprite;
 	PhysicsBody *body;
 public:
-	Entity();
+	Entity() : type(0), width(0), height(0), sprite(nullptr), body(nullptr) {}
 	virtual ~Entity() {}
 public:
 	virtual int getType() const = 0;

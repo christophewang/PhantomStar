@@ -100,7 +100,7 @@ void GameScene::BGMListener(Ref *Sender, ui::Widget::TouchEventType type)
 
 void GameScene::setParallaxBackground()
 {
-	__String *backgroundString = __String::createWithFormat(BACKGROUND, GameScene::backgroundType);
+	auto backgroundString = __String::createWithFormat(BACKGROUND, GameScene::backgroundType);
 	auto bg1 = Sprite::create(backgroundString->getCString());
 	auto bg2 = Sprite::create(backgroundString->getCString());
 
@@ -117,8 +117,8 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 {
 	PhysicsBody *a = contact.getShapeA()->getBody();
 	PhysicsBody *b = contact.getShapeB()->getBody();
-	Sprite *aSprite = (Sprite *)a->getNode();
-	Sprite *bSprite = (Sprite *)b->getNode();
+	Sprite *aSprite = static_cast<Sprite *>(a->getNode());
+	Sprite *bSprite = static_cast<Sprite *>(b->getNode());
 	Point aPos;
 	Point bPos;
 
@@ -133,13 +133,11 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 		this->shipCollision(bSprite);
 	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_METEOR && b->getCollisionBitmask() == COLLISION_BULLET)
 	{
-		GameScene::incrementScore(1);
 		this->meteorCollision(aSprite);
 		this->bulletCollision(bSprite);
 	}
 	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_METEOR && a->getCollisionBitmask() == COLLISION_BULLET)
 	{
-		GameScene::incrementScore(1);
 		this->meteorCollision(bSprite);
 		this->bulletCollision(bSprite);
 	}
@@ -167,17 +165,13 @@ void GameScene::meteorCollision(Sprite *meteor)
 {
 	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
 	{
-		if (this->meteorArray[i]->getSprite() == meteor)
+		if (this->meteorArray[i]->getSprite() == meteor && this->meteorArray[i]->getType())
 		{
-			this->meteorArray[i]->reduceLife();
-			if (this->meteorArray[i]->getLife() <= 0)
-			{
-				this->meteorArray[i]->displayExplosion(this);
-				starArray.push_back(new Star(this, this->meteorArray[i]->getPosition(), this->meteorArray[i]->getType()));
-				this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
-				delete this->meteorArray[i];
-				this->meteorArray.erase(this->meteorArray.begin() + i);
-			}
+			this->meteorArray[i]->displayExplosion(this);
+			starArray.push_back(new Star(this, this->meteorArray[i]->getPosition(), this->meteorArray[i]->getType()));
+			this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
+			delete this->meteorArray[i];
+			this->meteorArray.erase(this->meteorArray.begin() + i);
 		}
 	}
 }
@@ -287,35 +281,37 @@ void GameScene::incrementScore(int value)
 
 void GameScene::scaleDifficulty(Layer *layer)
 {
+	// TODO Difficulty scale with score
+	GameScene::speedMeteor = 0.5 / (GameScene::scorePoints + 100);///0.004f;
 	if (GameScene::scorePoints >= 100 && GameScene::scorePoints < 500)
 	{
-		GameScene::speedMeteor = 0.004f;
+		//GameScene::speedMeteor = 0.004f;
 		GameScene::speedBackground = -0.02f;
 		GameScene::frequencyMeteor = 180.0f;
 	}
 	else if (GameScene::scorePoints >= 500 && GameScene::scorePoints < 1000)
 	{
-		GameScene::speedMeteor = 0.003f;
+		//GameScene::speedMeteor = 0.003f;
 		GameScene::speedBackground = -0.03f;
 		GameScene::frequencyMeteor = 160.0f;
 	}
 	else if (GameScene::scorePoints >= 1000 && GameScene::scorePoints < 2000)
 	{
-		GameScene::speedMeteor = 0.002f;
+		//GameScene::speedMeteor = 0.002f;
 		GameScene::speedBackground = -0.04f;
 		GameScene::frequencyMeteor = 130.0f;
 	}
 	else if (GameScene::scorePoints >= 2000 && GameScene::scorePoints < 4000)
 	{
-		GameScene::speedMeteor = 0.0015f;
+		//GameScene::speedMeteor = 0.0017f;
 		GameScene::speedBackground = -0.05f;
 		GameScene::frequencyMeteor = 100.0f;
 	}
 	else if (GameScene::scorePoints >= 4000)
 	{
-		GameScene::speedMeteor = 0.001f;
+		//GameScene::speedMeteor = 0.0015f;
 		GameScene::speedBackground = -0.05f;
-		GameScene::frequencyMeteor = 80.0f;
+		GameScene::frequencyMeteor = 100.0f;
 	}
 }
 

@@ -1,6 +1,7 @@
 #ifndef __SHIP_H__
 #define __SHIP_H__
 
+#include <cstdlib>
 #include "cocos2d.h"
 #include "Definitions.h"
 #include "Entity.h"

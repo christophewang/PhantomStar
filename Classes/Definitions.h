@@ -1,6 +1,9 @@
 #ifndef __DEFINITIONS_H__
 #define __DEFINITIONS_H__
 
+/* Google Play */
+#define LINK "https://play.google.com/store/apps/details?id=com.wry.phantomstar"
+
 /* DELAY */
 #define DELAY_SPLASH_SCENE 1
 #define DELAY_TRANSITION 0.5f
@@ -21,7 +24,6 @@
 #define AUDIO_COLLISION "Audio/collisionShip.ogg"
 #define AUDIO_EXPLOSION "Audio/explosion.ogg"
 #define AUDIO_SHIP_EXPLOSION "Audio/explosionShip.ogg"
-#define AUDIO_CLICK "Audio/click.ogg"
 #define AUDIO_BACKGROUND "Audio/bgm.mp3"
 
 /* FONT */
@@ -46,9 +48,10 @@
 #define LASER_3 "laser3.png"
 #define METEOR "meteor%i.png"
 #define STAR "star%i.png"
+#define RED_PILL "pill_red.png"
 
 /* PARTICLE */
-#define SHIP_COLLISION "Particles/bulletCollision.plist"
+#define SHIP_COLLISION "Particles/shipCollision.plist"
 #define SHIP_EXPLOSION "Particles/shipExplosion.plist"
 #define BULLET_COLLISION "Particles/bulletCollision.plist"
 #define METEOR_EXPLOSION "Particles/meteorExplosion.plist"

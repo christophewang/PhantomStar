@@ -5,23 +5,21 @@ Meteor::Meteor(Layer *layer)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
-	int meteorIndex = rand() % 8 + 1;
+	auto meteorIndex = 0;
+
+	if (GameScene::scorePoints < 10000)
+		meteorIndex = rand() % 8 + 1;
+	else
+		meteorIndex = rand() % 16 + 1;
 
 	if (meteorIndex > 0 && meteorIndex <= 4)
-	{
 		this->type = 3;
-		this->life = 3;
-	}
 	else if (meteorIndex > 4 && meteorIndex <= 6)
-	{
 		this->type = 2;
-		this->life = 2;
-	}
 	else if (meteorIndex > 6 && meteorIndex <= 8)
-	{
 		this->type = 1;
-		this->life = 1;
-	}
+	else
+		this->type = 0;
 	__String *meteorString = __String::createWithFormat(METEOR, meteorIndex);
 
 	this->sprite = Sprite::createWithSpriteFrameName(meteorString->getCString());
@@ -33,7 +31,7 @@ Meteor::Meteor(Layer *layer)
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
 
-	float posX = (rand() % (int)visibleSize.width) + (this->width / 2);
+	float posX = (rand() % static_cast<int>(visibleSize.width)) + (this->width / 2);
 	if (posX + this->width / 2 > visibleSize.width)
 		posX = visibleSize.width - this->width / 2;
 	this->sprite->setPosition(Point(posX + origin.x, visibleSize.height + this->height + origin.y));
@@ -49,30 +47,23 @@ Meteor::Meteor(Layer *layer, float speed)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
-	int meteorIndex = rand() % 8 + 1;
+	auto meteorIndex = rand() % 16 + 1;
 
 	if (meteorIndex > 0 && meteorIndex <= 4)
-	{
 		this->type = 3;
-		this->life = 3;
-	}
 	else if (meteorIndex > 4 && meteorIndex <= 6)
-	{
 		this->type = 2;
-		this->life = 2;
-	}
 	else if (meteorIndex > 6 && meteorIndex <= 8)
-	{
 		this->type = 1;
-		this->life = 1;
-	}
+	else
+		this->type = 0;
 	__String *meteorString = __String::createWithFormat(METEOR, meteorIndex);
 
 	this->sprite = Sprite::createWithSpriteFrameName(meteorString->getCString());
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
 
-	float posX = (rand() % (int)visibleSize.width) + (this->width / 2);
+	auto posX = (rand() % static_cast<int>(visibleSize.width)) + (this->width / 2);
 	if (posX + this->width / 2 > visibleSize.width)
 		posX = visibleSize.width - this->width / 2;
 	this->sprite->setPosition(Point(posX + origin.x, visibleSize.height + this->height + origin.y));
@@ -82,16 +73,6 @@ Meteor::Meteor(Layer *layer, float speed)
 	auto meteorRotateBy = RotateBy::create(speed * visibleSize.height, 360);
 	this->sprite->runAction(Spawn::createWithTwoActions(meteorRotateBy, meteorMoveTo));
 	layer->addChild(this->sprite, 1, GAME_OBJECT);
-}
-
-int Meteor::getLife() const
-{
-	return this->life;
-}
-
-void Meteor::reduceLife()
-{
-	this->life--;
 }
 
 void Meteor::displayExplosion(Layer *layer)

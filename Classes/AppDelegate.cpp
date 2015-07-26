@@ -30,7 +30,6 @@ bool AppDelegate::applicationDidFinishLaunching()
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_EXPLOSION);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_COLLISION);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_SHIP_EXPLOSION);
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_CLICK);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(AUDIO_BACKGROUND);
 
 	/* Preload Sprite in Cache */
