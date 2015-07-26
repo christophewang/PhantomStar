@@ -1,19 +1,28 @@
-# Ignore everything
-/*
-/*/
- 
-# Inverse ignore 
-!/Classes/
-!/Resources/
-!.gitignore
-!README.md
- 
-# OS Stuff
-.DS_Store
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-$RECYCLE.BIN/
-Desktop.ini
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
