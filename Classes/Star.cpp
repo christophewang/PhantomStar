@@ -7,7 +7,7 @@ Star::Star(Layer *layer, Point pos, int type)
 	auto origin = Director::getInstance()->getVisibleOrigin();
 	this->type = type;
 
-	__String *starPath = __String::createWithFormat(STAR, this->type);
+	auto starPath = __String::createWithFormat(STAR, this->type);
 	this->sprite = Sprite::createWithSpriteFrameName(starPath->getCString());
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
@@ -38,7 +38,7 @@ Star::Star(Layer *layer, Point pos, int type)
 void Star::displayStarEffect(Layer *layer)
 {
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_STAR);
-	__String *starPath = __String::createWithFormat(STAR_EFFECT, this->type);
+	auto starPath = __String::createWithFormat(STAR_EFFECT, this->type);
 	auto starEffect = ParticleSystemQuad::create(starPath->getCString());
 	starEffect->setPosition(this->getPosition());
 	starEffect->setAutoRemoveOnFinish(true);

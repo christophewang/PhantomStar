@@ -10,13 +10,13 @@
 #include "SimpleAudioEngine.h"
 #include "NativeUtils.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class GameOverDialog : public Layer
 {
 public:
 	CREATE_FUNC(GameOverDialog);
-	virtual bool init();
+	virtual bool init() override;
 	void blockPassingTouch();
 	void setupUI();
 	void goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type);

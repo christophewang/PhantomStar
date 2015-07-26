@@ -127,32 +127,50 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 		aPos = aSprite->getPosition();
 		bPos = bSprite->getPosition();
 	}
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP && b->getCollisionBitmask() == COLLISION_METEOR)
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP 
+		&& b->getCollisionBitmask() == COLLISION_METEOR)
 		this->shipCollision(aSprite);
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_SHIP && a->getCollisionBitmask() == COLLISION_METEOR)
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_SHIP 
+		&& a->getCollisionBitmask() == COLLISION_METEOR)
 		this->shipCollision(bSprite);
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_METEOR && b->getCollisionBitmask() == COLLISION_BULLET)
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_METEOR 
+		&& b->getCollisionBitmask() == COLLISION_BULLET)
 	{
 		this->meteorCollision(aSprite);
 		this->bulletCollision(bSprite);
 	}
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_METEOR && a->getCollisionBitmask() == COLLISION_BULLET)
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_METEOR 
+		&& a->getCollisionBitmask() == COLLISION_BULLET)
 	{
 		this->meteorCollision(bSprite);
 		this->bulletCollision(bSprite);
 	}
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR && b->getCollisionBitmask() == COLLISION_SHIP)
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR 
+		&& b->getCollisionBitmask() == COLLISION_SHIP)
 		this->starCollision(aSprite);
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_STAR && a->getCollisionBitmask() == COLLISION_SHIP)
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_STAR 
+		&& a->getCollisionBitmask() == COLLISION_SHIP)
 		this->starCollision(bSprite);
 	return true;
 }
 
 void GameScene::shipCollision(Sprite *ship)
 {
+	// Shake Effect
+	auto shakeUp = MoveBy::create(0.05f, Point(0.0f, 10.0f));
+	auto shakeDown = shakeUp->reverse();
+	auto shakeEffect = Sequence::create(shakeUp, shakeDown, shakeUp, shakeDown, nullptr);
+	auto shakeRepeat = Repeat::create(shakeEffect, 2);
+	auto shakeRepeatForever = RepeatForever::create(shakeEffect);
+
 	this->ship->reduceLife(this);
+	if (this->ship->getLife() == 1)
+		this->runAction(shakeRepeatForever);
+	else
+		this->runAction(shakeRepeat);
 	if (this->ship->getLife() <= 0)
 	{
+		this->stopAllActions();
 		this->ship->displayExplosion(this);
 		this->ship->getSprite()->removeFromParentAndCleanup(true);
 		this->getEventDispatcher()->removeAllEventListeners();
@@ -198,11 +216,11 @@ void GameScene::starCollision(Sprite *star)
 		{
 			auto type = this->starArray[i]->getType();
 			if (type == 1)
-				GameScene::incrementScore(10);
-			else if (type == 2)
 				GameScene::incrementScore(50);
-			else if (type == 3)
+			else if (type == 2)
 				GameScene::incrementScore(100);
+			else if (type == 3)
+				GameScene::incrementScore(200);
 			this->starArray[i]->displayStarEffect(this);
 			this->starArray[i]->getSprite()->removeFromParentAndCleanup(true);
 			delete this->starArray[i];
@@ -281,38 +299,23 @@ void GameScene::incrementScore(int value)
 
 void GameScene::scaleDifficulty(Layer *layer)
 {
-	// TODO Difficulty scale with score
-	GameScene::speedMeteor = 0.5 / (GameScene::scorePoints + 100);///0.004f;
-	if (GameScene::scorePoints >= 100 && GameScene::scorePoints < 500)
-	{
-		//GameScene::speedMeteor = 0.004f;
-		GameScene::speedBackground = -0.02f;
-		GameScene::frequencyMeteor = 180.0f;
-	}
-	else if (GameScene::scorePoints >= 500 && GameScene::scorePoints < 1000)
-	{
-		//GameScene::speedMeteor = 0.003f;
-		GameScene::speedBackground = -0.03f;
-		GameScene::frequencyMeteor = 160.0f;
-	}
-	else if (GameScene::scorePoints >= 1000 && GameScene::scorePoints < 2000)
-	{
-		//GameScene::speedMeteor = 0.002f;
-		GameScene::speedBackground = -0.04f;
-		GameScene::frequencyMeteor = 130.0f;
-	}
-	else if (GameScene::scorePoints >= 2000 && GameScene::scorePoints < 4000)
-	{
-		//GameScene::speedMeteor = 0.0017f;
+	//Speed Background
+	if (GameScene::speedBackground <= -0.05f)
 		GameScene::speedBackground = -0.05f;
+	else
+		GameScene::speedBackground = -0.01f - (GameScene::scorePoints / 200000.0f);
+
+	//Speed Meteors
+	if (GameScene::speedMeteor <= 0.0015f)
+		GameScene::speedMeteor = 0.0015f;
+	else
+		GameScene::speedMeteor = 0.005f - (GameScene::scorePoints / 3000000.0f);
+
+	//Frequency Meteors
+	if (GameScene::frequencyMeteor <= 100.0f)
 		GameScene::frequencyMeteor = 100.0f;
-	}
-	else if (GameScene::scorePoints >= 4000)
-	{
-		//GameScene::speedMeteor = 0.0015f;
-		GameScene::speedBackground = -0.05f;
-		GameScene::frequencyMeteor = 100.0f;
-	}
+	else
+		GameScene::frequencyMeteor = 200.0f - (GameScene::scorePoints / 50.0f);
 }
 
 void GameScene::setDefaultValue()
@@ -321,7 +324,7 @@ void GameScene::setDefaultValue()
 	GameScene::speedBullet = 0.001f;
 	GameScene::speedMeteor = 0.005f;
 	GameScene::speedBackground = -0.01f;
-	GameScene::frequencyMeteor = 190.0f;
+	GameScene::frequencyMeteor = 200.0f;
 	GameScene::frequencyBullet = 150.0f;
 }
 

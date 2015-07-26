@@ -6,7 +6,7 @@
 #include "Entity.h"
 #include "SimpleAudioEngine.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class Star : public Entity
 {
@@ -15,13 +15,13 @@ public:
 	~Star() {}
 public:
 	void displayStarEffect(Layer *layer);
-	virtual int getType() const;
-	virtual float getWidth() const;
-	virtual float getHeight() const;
-	virtual Sprite* getSprite() const;
-	virtual Point getPosition() const;
-	virtual float getPositionX() const;
-	virtual float getPositionY() const;
+	virtual int getType() const override;
+	virtual float getWidth() const override;
+	virtual float getHeight() const override;
+	virtual Sprite* getSprite() const override;
+	virtual Point getPosition() const override;
+	virtual float getPositionX() const override;
+	virtual float getPositionY() const override;
 };
 
 #endif // __STAR_H__
