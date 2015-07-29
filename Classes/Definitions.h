@@ -12,19 +12,29 @@
 #define GAME_OBJECT 1
 #define DIALOG_OBJECT 2
 
+/* ITEM */
+#define REPAIR_ITEM 1
+
+/* INTENSITY */
+#define LEVEL_ONE -5.0f
+#define LEVEL_TWO -10.0f
+#define LEVEL_THREE -15.0f
+
 /* COLLISION BITMAP */
 #define COLLISION_SHIP 0x000001
 #define COLLISION_METEOR 0x000002
 #define COLLISION_BULLET 0x000003
 #define COLLISION_STAR 0x000004
+#define COLLISION_ITEM 0x000005
 
 /* AUDIO */
-#define AUDIO_SHOOT "Audio/laser.ogg"
-#define AUDIO_STAR "Audio/star.ogg"
-#define AUDIO_COLLISION "Audio/collisionShip.ogg"
-#define AUDIO_EXPLOSION "Audio/explosion.ogg"
-#define AUDIO_SHIP_EXPLOSION "Audio/explosionShip.ogg"
+#define AUDIO_STAR "Audio/star.wav"
+#define AUDIO_REPAIR "Audio/shipRepair.wav"
+#define AUDIO_COLLISION "Audio/collisionShip.wav"
+#define AUDIO_EXPLOSION "Audio/explosion.wav"
+#define AUDIO_SHIP_EXPLOSION "Audio/explosionShip.wav"
 #define AUDIO_BACKGROUND "Audio/bgm.mp3"
+#define AUDIO_GAMEOVER "Audio/gameover.mp3"
 
 /* FONT */
 #define FONT "Fonts/kenvector_future_thin.ttf"
@@ -51,6 +61,7 @@
 #define RED_PILL "pill_red.png"
 
 /* PARTICLE */
+#define SHIP_REPAIR "Particles/shipRepair.plist"
 #define SHIP_COLLISION "Particles/shipCollision.plist"
 #define SHIP_EXPLOSION "Particles/shipExplosion.plist"
 #define BULLET_COLLISION "Particles/bulletCollision.plist"

@@ -20,7 +20,7 @@ Meteor::Meteor(Layer *layer)
 		this->type = 1;
 	else
 		this->type = 0;
-	__String *meteorString = __String::createWithFormat(METEOR, meteorIndex);
+	auto meteorString = __String::createWithFormat(METEOR, meteorIndex);
 
 	this->sprite = Sprite::createWithSpriteFrameName(meteorString->getCString());
 	this->body = PhysicsBody::createCircle(this->sprite->getContentSize().width / 2);
@@ -31,7 +31,7 @@ Meteor::Meteor(Layer *layer)
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
 
-	float posX = (rand() % static_cast<int>(visibleSize.width)) + (this->width / 2);
+	auto posX = (rand() % static_cast<int>(visibleSize.width)) + (this->width / 2);
 	if (posX + this->width / 2 > visibleSize.width)
 		posX = visibleSize.width - this->width / 2;
 	this->sprite->setPosition(Point(posX + origin.x, visibleSize.height + this->height + origin.y));

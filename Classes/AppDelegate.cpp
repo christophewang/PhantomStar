@@ -25,12 +25,13 @@ bool AppDelegate::applicationDidFinishLaunching()
 	//TODO Sprite resolution
 
 	/* Preload Sounds and BGM */
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_SHOOT);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_STAR);
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_REPAIR);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_EXPLOSION);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_COLLISION);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_SHIP_EXPLOSION);
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(AUDIO_BACKGROUND);
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(AUDIO_GAMEOVER);
 
 	/* Preload Sprite in Cache */
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("spriteSheet.plist", "spriteSheet.png");

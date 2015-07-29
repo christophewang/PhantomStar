@@ -5,7 +5,7 @@ bool GameOverDialog::init()
 {
 	if (!Layer::init())
 		return false;
-	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	
 	this->blockPassingTouch();
 	this->setupUI();
 	return true;
@@ -32,17 +32,17 @@ void GameOverDialog::setupUI()
 	auto dialogBackground = gameOverDialog->getChildByName("dialogBackground");
 	dialogBackground->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
-	ui::Text *highScoreLabel = static_cast<ui::Text *>(dialogBackground->getChildByName("highScoreLabel"));
+	auto highScoreLabel = static_cast<ui::Text *>(dialogBackground->getChildByName("highScoreLabel"));
 	highScoreLabel->setString(String::createWithFormat("Best: %d", this->checkHighScore())->getCString());
 
-	ui::Text *scoreLabel = static_cast<ui::Text *>(dialogBackground->getChildByName("scoreLabel"));
+	auto scoreLabel = static_cast<ui::Text *>(dialogBackground->getChildByName("scoreLabel"));
 	scoreLabel->setString(String::createWithFormat("Current: %d", GameScene::scorePoints)->getCString());
 
-	ui::Button *resumeButton = static_cast<ui::Button*>(dialogBackground->getChildByName("retryButton"));
+	auto resumeButton = static_cast<ui::Button*>(dialogBackground->getChildByName("retryButton"));
 	resumeButton->setTouchEnabled(true);
 	resumeButton->addTouchEventListener(CC_CALLBACK_2(GameOverDialog::goToGameScene, this));
 
-	ui::Button *menuButton = static_cast<ui::Button*>(dialogBackground->getChildByName("menuButton"));
+	auto menuButton = static_cast<ui::Button*>(dialogBackground->getChildByName("menuButton"));
 	menuButton->setTouchEnabled(true);
 	menuButton->addTouchEventListener(CC_CALLBACK_2(GameOverDialog::goToMainMenuScene, this));
 	this->addChild(gameOverDialog, 4);
@@ -73,7 +73,7 @@ void GameOverDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType t
 
 int GameOverDialog::checkHighScore()
 {
-	UserDefault *def = UserDefault::getInstance();
+	auto def = UserDefault::getInstance();
 
 	auto highScore = def->getIntegerForKey(HIGHSCORE_KEY, 0);
 	if (GameScene::scorePoints > highScore)

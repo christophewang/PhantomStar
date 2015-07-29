@@ -12,7 +12,7 @@
 #include "cocostudio/CocoStudio.h"
 #include "NativeUtils.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class MainMenuScene : public Layer
 {
@@ -24,9 +24,9 @@ private:
 	CCParallaxScrollNode *parallaxBg;
 public:
 	static Scene* createScene();
-	virtual bool init();
-	virtual void update(float delta);
-	virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent);
+	virtual bool init() override;
+	virtual void update(float delta) override;
+	virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent) override;
 	CREATE_FUNC(MainMenuScene);
 	
 	void meteorUpdate();

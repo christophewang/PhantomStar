@@ -6,6 +6,7 @@
 #include "Bullet.h"
 #include "Ship.h"
 #include "Star.h"
+#include "Item.h"
 #include "MainMenuScene.h"
 #include "Definitions.h"
 #include "CCParallaxScrollNode.h"
@@ -14,7 +15,7 @@
 #include "GameDialog.h"
 #include "GameOverDialog.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class GameScene : public Layer
 {
@@ -24,12 +25,15 @@ private:
 	PhysicsWorld *sceneWorld;
 	CCParallaxScrollNode *parallaxBg;
 	Label *scoreLabel;
+	Label *highScoreLabel;
 	float timerMeteor;
 	float timerBullet;
+	float timerItem;
 	Ship *ship;
 	std::vector<Meteor *> meteorArray;
 	std::vector<Bullet *> bulletArray;
 	std::vector<Star *> starArray;
+	std::vector<Item *> itemArray;
 	ui::Button *soundBGMButton;
 	UserDefault *def;
 public:
@@ -37,9 +41,9 @@ public:
 	~GameScene();
 public:
 	static Scene *createScene();
-	virtual bool init();
-	virtual void update(float delta);
-	virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent);
+	virtual bool init() override;
+	virtual void update(float delta) override;
+	virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent) override;
 	CREATE_FUNC(GameScene);
 
 	void checkBGMSettings();
@@ -52,18 +56,22 @@ public:
 	void meteorCollision(Sprite *meteor);
 	void bulletCollision(Sprite *bullet);
 	void starCollision(Sprite *star);
+	void itemCollision(Sprite *item);
 	void bulletUpdate();
 	void meteorUpdate();
 	void starUpdate();
+	void itemUpdate();
 	
 	/* Static Game Proprieties */
 	static int scorePoints;
 	static int backgroundType;
 	static float speedBullet;
 	static float speedMeteor;
+	static float speedItem;
 	static float speedBackground;
-	static float frequencyMeteor;
 	static float frequencyBullet;
+	static float frequencyMeteor;
+	static float frequencyItem;
 	static void incrementScore(int value);
 	static void scaleDifficulty(Layer *layer);
 	static void setDefaultValue();

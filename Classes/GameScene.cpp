@@ -4,12 +4,14 @@ int GameScene::scorePoints = 0;
 int GameScene::backgroundType = 1;
 float GameScene::speedBullet = 0.0f;
 float GameScene::speedMeteor = 0.0f;
+float GameScene::speedItem = 0.0f;
 float GameScene::speedBackground = 0.0f;
-float GameScene::frequencyMeteor = 0.0f;
 float GameScene::frequencyBullet = 0.0f;
+float GameScene::frequencyMeteor = 0.0f;
+float GameScene::frequencyItem = 0.0f;
 
 GameScene::GameScene()
-	: timerMeteor(0), timerBullet(0)
+	: timerMeteor(0), timerBullet(0), timerItem(0)
 {
 	GameScene::setDefaultValue();
 	def = UserDefault::getInstance();
@@ -47,6 +49,12 @@ bool GameScene::init()
 	scoreLabel->setPosition(Point(visibleSize.width / 2 + origin.x,
 		visibleSize.height - visibleSize.height / 15 + origin.y));
 
+	std::stringstream highScore;
+	highScore << "Best: " << def->getIntegerForKey(HIGHSCORE_KEY, 0);
+	highScoreLabel = Label::createWithTTF(highScore.str(), FONT, visibleSize.height / 40);
+	highScoreLabel->setAlignment(TextHAlignment::CENTER);
+	highScoreLabel->setPosition(Point(visibleSize.width / 2 + origin.x,
+		visibleSize.height - visibleSize.height / 40 + origin.y));
 	soundBGMButton = ui::Button::create();
 	this->checkBGMSettings();
 	soundBGMButton->setPosition(Point(visibleSize.width - soundBGMButton->getContentSize().width / 2 + origin.x,
@@ -65,11 +73,13 @@ bool GameScene::init()
 	this->scheduleUpdate();
 	this->addChild(soundBGMButton, 3);
 	this->addChild(scoreLabel, 3);
+	this->addChild(highScoreLabel, 3);
 	return true;
 }
 
 void GameScene::checkBGMSettings()
 {
+	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
 	if (!def->getBoolForKey(BGM_KEY, false))
 	{
 		CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_BACKGROUND, true);
@@ -115,67 +125,50 @@ void GameScene::setParallaxBackground()
 
 bool GameScene::onContactBegin(PhysicsContact &contact)
 {
-	PhysicsBody *a = contact.getShapeA()->getBody();
-	PhysicsBody *b = contact.getShapeB()->getBody();
-	Sprite *aSprite = static_cast<Sprite *>(a->getNode());
-	Sprite *bSprite = static_cast<Sprite *>(b->getNode());
-	Point aPos;
-	Point bPos;
+	auto a = contact.getShapeA()->getBody();
+	auto b = contact.getShapeB()->getBody();
+	auto aSprite = static_cast<Sprite *>(a->getNode());
+	auto bSprite = static_cast<Sprite *>(b->getNode());
 
-	if (aSprite && bSprite)
-	{
-		aPos = aSprite->getPosition();
-		bPos = bSprite->getPosition();
-	}
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP 
-		&& b->getCollisionBitmask() == COLLISION_METEOR)
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP && b->getCollisionBitmask() == COLLISION_METEOR)
 		this->shipCollision(aSprite);
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_SHIP 
-		&& a->getCollisionBitmask() == COLLISION_METEOR)
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_SHIP && a->getCollisionBitmask() == COLLISION_METEOR)
 		this->shipCollision(bSprite);
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_METEOR 
-		&& b->getCollisionBitmask() == COLLISION_BULLET)
+
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_METEOR && b->getCollisionBitmask() == COLLISION_BULLET)
 	{
 		this->meteorCollision(aSprite);
 		this->bulletCollision(bSprite);
 	}
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_METEOR 
-		&& a->getCollisionBitmask() == COLLISION_BULLET)
+
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_METEOR && a->getCollisionBitmask() == COLLISION_BULLET)
 	{
 		this->meteorCollision(bSprite);
 		this->bulletCollision(bSprite);
 	}
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR 
-		&& b->getCollisionBitmask() == COLLISION_SHIP)
+
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR && b->getCollisionBitmask() == COLLISION_SHIP)
 		this->starCollision(aSprite);
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_STAR 
-		&& a->getCollisionBitmask() == COLLISION_SHIP)
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_STAR && a->getCollisionBitmask() == COLLISION_SHIP)
 		this->starCollision(bSprite);
+
+	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_ITEM && b->getCollisionBitmask() == COLLISION_SHIP)
+		this->itemCollision(aSprite);
+	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_ITEM && a->getCollisionBitmask() == COLLISION_SHIP)
+		this->itemCollision(bSprite);
 	return true;
 }
 
 void GameScene::shipCollision(Sprite *ship)
 {
-	// Shake Effect
-	auto shakeUp = MoveBy::create(0.05f, Point(0.0f, 10.0f));
-	auto shakeDown = shakeUp->reverse();
-	auto shakeEffect = Sequence::create(shakeUp, shakeDown, shakeUp, shakeDown, nullptr);
-	auto shakeRepeat = Repeat::create(shakeEffect, 2);
-	auto shakeRepeatForever = RepeatForever::create(shakeEffect);
-
 	this->ship->reduceLife(this);
-	if (this->ship->getLife() == 1)
-		this->runAction(shakeRepeatForever);
-	else
-		this->runAction(shakeRepeat);
 	if (this->ship->getLife() <= 0)
 	{
-		this->stopAllActions();
 		this->ship->displayExplosion(this);
 		this->ship->getSprite()->removeFromParentAndCleanup(true);
 		this->getEventDispatcher()->removeAllEventListeners();
 		this->unscheduleAllCallbacks();
-		this->schedule(schedule_selector(GameScene::displayGameOver), 2.0f);
+		this->scheduleOnce(schedule_selector(GameScene::displayGameOver), 2.0f);
 	}
 }
 
@@ -229,6 +222,22 @@ void GameScene::starCollision(Sprite *star)
 	}
 }
 
+void GameScene::itemCollision(Sprite* item)
+{
+	for (unsigned int i = 0; i < this->itemArray.size(); ++i)
+	{
+		if (this->itemArray[i]->getSprite() == item)
+		{
+			auto type = this->itemArray[i]->getType();
+			if (type == REPAIR_ITEM)
+				this->ship->incrementLife(this);
+			this->itemArray[i]->getSprite()->removeFromParentAndCleanup(true);
+			delete this->itemArray[i];
+			this->itemArray.erase(this->itemArray.begin() + i);
+		}
+	}
+}
+
 void GameScene::meteorUpdate()
 {
 	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
@@ -268,6 +277,19 @@ void GameScene::starUpdate()
 	}
 }
 
+void GameScene::itemUpdate()
+{
+	for (unsigned int i = 0; i < this->itemArray.size(); ++i)
+	{
+		if (this->itemArray[i]->getPositionY() < origin.y)
+		{
+			this->itemArray[i]->getSprite()->removeFromParentAndCleanup(true);
+			delete this->itemArray[i];
+			this->itemArray.erase(this->itemArray.begin() + i);
+		}
+	}
+}
+
 void GameScene::update(float delta)
 {
 	this->timerMeteor += delta;
@@ -278,6 +300,7 @@ void GameScene::update(float delta)
 		this->meteorUpdate();
 		this->starUpdate();
 	}
+
 	this->timerBullet += delta;
 	if (this->timerBullet > GameScene::frequencyBullet / this->visibleSize.height)
 	{
@@ -285,6 +308,15 @@ void GameScene::update(float delta)
 		bulletArray.push_back(new Bullet(this, this->ship->getPosition(), this->ship->getType()));
 		this->bulletUpdate();
 	}
+
+	this->timerItem += delta;
+	if (this->timerItem > GameScene::frequencyItem / this->visibleSize.height)
+	{
+		this->timerItem = 0;
+		itemArray.push_back(new Item(this));
+		this->itemUpdate();
+	}
+
 	std::stringstream score;
 	score << GameScene::scorePoints;
 	this->scoreLabel->setString(score.str());
@@ -306,8 +338,8 @@ void GameScene::scaleDifficulty(Layer *layer)
 		GameScene::speedBackground = -0.01f - (GameScene::scorePoints / 200000.0f);
 
 	//Speed Meteors
-	if (GameScene::speedMeteor <= 0.0015f)
-		GameScene::speedMeteor = 0.0015f;
+	if (GameScene::speedMeteor <= 0.0020f)
+		GameScene::speedMeteor = 0.0020f;
 	else
 		GameScene::speedMeteor = 0.005f - (GameScene::scorePoints / 3000000.0f);
 
@@ -323,14 +355,23 @@ void GameScene::setDefaultValue()
 	GameScene::scorePoints = 0;
 	GameScene::speedBullet = 0.001f;
 	GameScene::speedMeteor = 0.005f;
+	GameScene::speedItem = 0.005f;
 	GameScene::speedBackground = -0.01f;
+	GameScene::frequencyBullet = 200.0f;
 	GameScene::frequencyMeteor = 200.0f;
-	GameScene::frequencyBullet = 150.0f;
+	GameScene::frequencyItem = 10000.0f;
 }
 
 void GameScene::displayGameOver(float delta)
 {
+	if (!def->getBoolForKey(BGM_KEY, false))
+	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+		CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_GAMEOVER, true);
+	}
+
 	this->scoreLabel->setVisible(false);
+	this->highScoreLabel->setVisible(false);
 	auto gameOverDialog = GameOverDialog::create();
 	this->addChild(gameOverDialog, 4, DIALOG_OBJECT);
 }

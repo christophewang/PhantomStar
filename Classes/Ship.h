@@ -7,7 +7,7 @@
 #include "Entity.h"
 #include "SimpleAudioEngine.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class Ship : public Entity
 {
@@ -18,6 +18,9 @@ private:
 	Sprite *lifeOne;
 	Sprite *lifeTwo;
 	Sprite *lifeThree;
+	Sprite *damageOne;
+	Sprite *damageTwo;
+	Sprite *damageThree;
 	Point touchOffset;
 public:
 	Ship(Layer *layer);
@@ -25,23 +28,23 @@ public:
 public:
 	int getLife() const;
 	void displayLife(Layer *layer, int shipIndex);
+	void shakeScreen(Layer *layer, float intensity);
+	void updateLife(Layer *layer);
+	void incrementLife(Layer *layer);
 	void reduceLife(Layer *layer);
 	void scalingEffect();
-	void showDamageOne();
-	void showDamageTwo();
-	void showDamageThree();
 	void displayExplosion(Layer *layer);
 	Point touchToPoint(Touch* touch);
 	void onTouchesBegan(const std::vector<Touch*>& touches, Event* event);
 	void onTouchesMoved(const std::vector<Touch*>& touches, Event* event);
 	void onTouchesEnded(const std::vector<Touch*>& touches, Event* event);
-	virtual int getType() const;
-	virtual float getWidth() const;
-	virtual float getHeight() const;
-	virtual Sprite* getSprite() const;
-	virtual Point getPosition() const;
-	virtual float getPositionX() const;
-	virtual float getPositionY() const;
+	virtual int getType() const override;
+	virtual float getWidth() const override;
+	virtual float getHeight() const override;
+	virtual Sprite* getSprite() const override;
+	virtual Point getPosition() const override;
+	virtual float getPositionX() const override;
+	virtual float getPositionY() const override;
 };
 
 #endif // __SHIP_H__

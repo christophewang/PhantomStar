@@ -28,7 +28,6 @@ Bullet::Bullet(Layer *layer, Point pos, int type)
 	auto bulletMoveTo = MoveTo::create(GameScene::speedBullet * visibleSize.height, 
 		Point(pos.x + origin.x, this->height * 2 + visibleSize.height + origin.y));
 	this->sprite->runAction(bulletMoveTo);
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHOOT);
 	layer->addChild(this->sprite, 2, GAME_OBJECT);
 }
 
