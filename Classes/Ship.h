@@ -32,6 +32,7 @@ public:
 	void updateLife(Layer *layer);
 	void incrementLife(Layer *layer);
 	void reduceLife(Layer *layer);
+	void resetContact();
 	void scalingEffect();
 	void displayExplosion(Layer *layer);
 	Point touchToPoint(Touch* touch);

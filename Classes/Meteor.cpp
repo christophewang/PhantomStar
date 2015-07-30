@@ -57,7 +57,7 @@ Meteor::Meteor(Layer *layer, float speed)
 		this->type = 1;
 	else
 		this->type = 0;
-	__String *meteorString = __String::createWithFormat(METEOR, meteorIndex);
+	auto meteorString = __String::createWithFormat(METEOR, meteorIndex);
 
 	this->sprite = Sprite::createWithSpriteFrameName(meteorString->getCString());
 	this->width = this->sprite->getContentSize().width;

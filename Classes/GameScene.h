@@ -34,7 +34,8 @@ private:
 	std::vector<Bullet *> bulletArray;
 	std::vector<Star *> starArray;
 	std::vector<Item *> itemArray;
-	ui::Button *soundBGMButton;
+	ui::Button *settingsButton;
+	//ui::Button *soundBGMButton;
 	UserDefault *def;
 public:
 	GameScene();
@@ -47,7 +48,8 @@ public:
 	CREATE_FUNC(GameScene);
 
 	void checkBGMSettings();
-	void BGMListener(Ref *sender, ui::Widget::TouchEventType type);
+	void showSettings(Ref *sender, ui::Widget::TouchEventType type);
+	//void BGMListener(Ref *sender, ui::Widget::TouchEventType type);
 	void setParallaxBackground();
 	void displayGameOver(float delta);
 

@@ -1,4 +1,5 @@
 #include "Ship.h"
+#include "BodyParser.h"
 
 Ship::Ship(Layer *layer)
 {
@@ -10,6 +11,7 @@ Ship::Ship(Layer *layer)
 	if (shipIndex > 0 && shipIndex <= 4)
 	{
 		this->type = 1;
+		BodyParser::getInstance()->parseJsonFile(BODY_SHIP1);
 		this->damageOne = Sprite::createWithSpriteFrameName(DAMAGE_1_1);
 		this->damageTwo = Sprite::createWithSpriteFrameName(DAMAGE_1_2);
 		this->damageThree = Sprite::createWithSpriteFrameName(DAMAGE_1_3);
@@ -17,6 +19,7 @@ Ship::Ship(Layer *layer)
 	else if (shipIndex > 4 && shipIndex <= 8)
 	{
 		this->type = 2;
+		BodyParser::getInstance()->parseJsonFile(BODY_SHIP2);
 		this->damageOne = Sprite::createWithSpriteFrameName(DAMAGE_2_1);
 		this->damageTwo = Sprite::createWithSpriteFrameName(DAMAGE_2_2);
 		this->damageThree = Sprite::createWithSpriteFrameName(DAMAGE_2_3);
@@ -24,6 +27,7 @@ Ship::Ship(Layer *layer)
 	else
 	{
 		this->type = 3;
+		BodyParser::getInstance()->parseJsonFile(BODY_SHIP3);
 		this->damageOne = Sprite::createWithSpriteFrameName(DAMAGE_3_1);
 		this->damageTwo = Sprite::createWithSpriteFrameName(DAMAGE_3_2);
 		this->damageThree = Sprite::createWithSpriteFrameName(DAMAGE_3_3);
@@ -32,17 +36,17 @@ Ship::Ship(Layer *layer)
 	this->displayLife(layer, shipIndex);
 	auto shipString = __String::createWithFormat(SHIP, shipIndex);
 	this->sprite = Sprite::createWithSpriteFrameName(shipString->getCString());
-	this->sprite->setScale(0.75);
 	this->width = this->sprite->getContentSize().width;
 	this->height = this->sprite->getContentSize().height;
 	this->sprite->setPosition(Point(this->visibleSize.width / 2 + this->origin.x, 
 		this->visibleSize.height / 4 + this->origin.y));
-	auto speed = Sprite::createWithSpriteFrameName(EMITTER);
+
+	/*auto speed = Sprite::createWithSpriteFrameName(EMITTER);
 	speed->setAnchorPoint(Point(0.5, 1));
 	speed->setPosition(Point(this->width / 2, 0));
-	this->sprite->addChild(speed, 1, GAME_OBJECT);
+	this->sprite->addChild(speed, 1, GAME_OBJECT);*/
 
-	this->body = PhysicsBody::createCircle((this->width * 0.75) / 2);
+	this->body = BodyParser::getInstance()->bodyFormJson(this->sprite, "Ship");
 	this->body->setCollisionBitmask(COLLISION_SHIP);
 	this->body->setContactTestBitmask(true);
 	this->body->setGravityEnable(false);
@@ -174,6 +178,23 @@ void Ship::reduceLife(Layer *layer)
 	layer->addChild(shipCollision, 3);
 	this->life--;
 	this->updateLife(layer);
+	if (this->life > 0)
+	{
+		// Ship in Blink Mode - Contact inactive
+		this->body->setContactTestBitmask(false);
+		this->sprite->runAction(
+			Spawn::createWithTwoActions(
+			Blink::create(1.0f, 10),
+			Sequence::create(
+			DelayTime::create(1.0f), 
+			CallFunc::create(CC_CALLBACK_0(Ship::resetContact, this)),
+			nullptr)));
+	}
+}
+
+void Ship::resetContact()
+{
+	this->body->setContactTestBitmask(true);
 }
 
 void Ship::scalingEffect()
@@ -184,7 +205,7 @@ void Ship::scalingEffect()
 		ScaleBy::create(0.125f, 0.9f),
 		nullptr
 		));
-	this->sprite->setScale(0.75);
+	this->sprite->setScale(1.0f);
 }
 
 void Ship::displayExplosion(Layer *layer)

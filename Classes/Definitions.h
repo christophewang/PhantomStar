@@ -27,6 +27,11 @@
 #define COLLISION_STAR 0x000004
 #define COLLISION_ITEM 0x000005
 
+/* PHYSICS BODY */
+#define BODY_SHIP1 "PhysicsBodies/shipType1.json"
+#define BODY_SHIP2 "PhysicsBodies/shipType2.json"
+#define BODY_SHIP3 "PhysicsBodies/shipType3.json"
+
 /* AUDIO */
 #define AUDIO_STAR "Audio/star.wav"
 #define AUDIO_REPAIR "Audio/shipRepair.wav"
@@ -69,6 +74,7 @@
 #define STAR_EFFECT "Particles/star%i.plist"
 
 /* UI */
+#define OPTION "UI/option.png"
 #define MUSIC_ON "UI/musicOn.png"
 #define MUSIC_OFF "UI/musicOff.png"
 #define BGM_KEY "BGM_MUTED"
