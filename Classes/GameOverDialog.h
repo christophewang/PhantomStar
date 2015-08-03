@@ -1,5 +1,4 @@
-#ifndef __GAMEOVERDIALOG_H__
-#define __GAMEOVERDIALOG_H__
+#pragma once
 
 #include "cocos2d.h"
 #include "Definitions.h"
@@ -16,6 +15,7 @@ class GameOverDialog : public Layer
 {
 public:
 	CREATE_FUNC(GameOverDialog);
+
 	virtual bool init() override;
 	void blockPassingTouch();
 	void setupUI();
@@ -23,5 +23,3 @@ public:
 	void goToGameScene(Ref *sender, ui::Widget::TouchEventType type);
 	int checkHighScore();
 };
-
-#endif // __GAMEOVERDIALOG_H__

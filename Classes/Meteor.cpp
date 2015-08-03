@@ -1,120 +1,73 @@
 #include "Meteor.h"
 #include "GameScene.h"
 
-Meteor::Meteor(Layer *layer)
+void Meteor::runMeteor(Layer *layer, int index, float speed)
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
-	auto meteorIndex = 0;
 
+	auto meteorIndex = 0;
 	if (GameScene::scorePoints < 10000)
 		meteorIndex = rand() % 8 + 1;
 	else
 		meteorIndex = rand() % 16 + 1;
 
 	if (meteorIndex > 0 && meteorIndex <= 4)
-		this->type = 3;
+		type = 3;
 	else if (meteorIndex > 4 && meteorIndex <= 6)
-		this->type = 2;
+		type = 2;
 	else if (meteorIndex > 6 && meteorIndex <= 8)
-		this->type = 1;
+		type = 1;
 	else
-		this->type = 0;
+		type = 0;
+
 	auto meteorString = __String::createWithFormat(METEOR, meteorIndex);
+	sprite = Sprite::createWithSpriteFrameName(meteorString->getCString());
+	width = sprite->getContentSize().width;
+	height = sprite->getContentSize().height;
 
-	this->sprite = Sprite::createWithSpriteFrameName(meteorString->getCString());
-	this->body = PhysicsBody::createCircle(this->sprite->getContentSize().width / 2);
-	this->body->setCollisionBitmask(COLLISION_METEOR);
-	this->body->setContactTestBitmask(true);
-	this->body->setDynamic(false);
-	this->sprite->setPhysicsBody(this->body);
-	this->width = this->sprite->getContentSize().width;
-	this->height = this->sprite->getContentSize().height;
+	body = PhysicsBody::createCircle(width / 2);
+	body->setCollisionBitmask(COLLISION_METEOR);
+	body->setContactTestBitmask(true);
+	body->setDynamic(false);
+	body->setTag(index);
+	sprite->setPhysicsBody(body);
 
-	auto posX = (rand() % static_cast<int>(visibleSize.width)) + (this->width / 2);
-	if (posX + this->width / 2 > visibleSize.width)
-		posX = visibleSize.width - this->width / 2;
-	this->sprite->setPosition(Point(posX + origin.x, visibleSize.height + this->height + origin.y));
+	auto posX = (rand() % static_cast<int>(visibleSize.width)) + (width / 2);
+	if (posX + width / 2 > visibleSize.width)
+		posX = visibleSize.width - width / 2;
 
-	auto meteorMoveTo = MoveTo::create(GameScene::speedMeteor * visibleSize.height,
-		Point(posX + origin.x, -this->height + origin.y));
-	auto meteorRotateBy = RotateBy::create(GameScene::speedMeteor * visibleSize.height, 360);
-	this->sprite->runAction(Spawn::createWithTwoActions(meteorRotateBy, meteorMoveTo));
-	layer->addChild(this->sprite, 1, GAME_OBJECT);
-}
-
-Meteor::Meteor(Layer *layer, float speed)
-{
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	auto origin = Director::getInstance()->getVisibleOrigin();
-	auto meteorIndex = rand() % 16 + 1;
-
-	if (meteorIndex > 0 && meteorIndex <= 4)
-		this->type = 3;
-	else if (meteorIndex > 4 && meteorIndex <= 6)
-		this->type = 2;
-	else if (meteorIndex > 6 && meteorIndex <= 8)
-		this->type = 1;
-	else
-		this->type = 0;
-	auto meteorString = __String::createWithFormat(METEOR, meteorIndex);
-
-	this->sprite = Sprite::createWithSpriteFrameName(meteorString->getCString());
-	this->width = this->sprite->getContentSize().width;
-	this->height = this->sprite->getContentSize().height;
-
-	auto posX = (rand() % static_cast<int>(visibleSize.width)) + (this->width / 2);
-	if (posX + this->width / 2 > visibleSize.width)
-		posX = visibleSize.width - this->width / 2;
-	this->sprite->setPosition(Point(posX + origin.x, visibleSize.height + this->height + origin.y));
+	auto offX = (rand() % static_cast<int>(visibleSize.width)) + (width / 2);
+	if (offX + width / 2 > visibleSize.width)
+		offX = visibleSize.width - width / 2;
 
 	auto meteorMoveTo = MoveTo::create(speed * visibleSize.height,
-		Point(posX + origin.x, -this->height + origin.y));
-	auto meteorRotateBy = RotateBy::create(speed * visibleSize.height, 360);
-	this->sprite->runAction(Spawn::createWithTwoActions(meteorRotateBy, meteorMoveTo));
-	layer->addChild(this->sprite, 1, GAME_OBJECT);
+		Point(offX + origin.x, -height + origin.y));
+	auto meteorRotateBy = RepeatForever::create(
+		RotateBy::create(speed * visibleSize.height, 360));
+
+	auto sequence = Sequence::create(
+		meteorMoveTo,
+		CallFunc::create(CC_CALLBACK_0(Meteor::resetMeteor, this)),
+		nullptr);
+
+	sprite->setPosition(Point(posX + origin.x, visibleSize.height + height + origin.y));
+	sprite->runAction(meteorRotateBy);
+	sprite->runAction(sequence);
+	layer->addChild(sprite, 2, GAME_OBJECT);
+}
+
+void Meteor::resetMeteor()
+{
+	sprite->stopAllActions();
+	sprite->removeFromParentAndCleanup(true);
 }
 
 void Meteor::displayExplosion(Layer *layer)
 {
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_EXPLOSION);
+	//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_EXPLOSION);
 	auto explosion = ParticleSystemQuad::create(METEOR_EXPLOSION);
-	explosion->setPosition(this->getPosition());
+	explosion->setPosition(getPosition());
 	explosion->setAutoRemoveOnFinish(true);
-	layer->addChild(explosion, 1);
-}
-
-int Meteor::getType() const
-{
-	return this->type;
-}
-
-float Meteor::getWidth() const
-{
-	return this->width;
-}
-
-float Meteor::getHeight() const
-{
-	return this->height;
-}
-
-Sprite* Meteor::getSprite() const
-{
-	return this->sprite;
-}
-
-Point Meteor::getPosition() const
-{
-	return this->sprite->getPosition();
-}
-
-float Meteor::getPositionX() const
-{
-	return this->sprite->getPositionX();
-}
-
-float Meteor::getPositionY() const
-{
-	return this->sprite->getPositionY();
+	layer->addChild(explosion, 2);
 }

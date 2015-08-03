@@ -1,7 +1,7 @@
-#ifndef __GAMESCENE_H__
-#define __GAMESCENE_H__
+#pragma once
 
 #include "cocos2d.h"
+#include "Entity.h"
 #include "Meteor.h"
 #include "Bullet.h"
 #include "Ship.h"
@@ -29,10 +29,21 @@ private:
 	float timerMeteor;
 	float timerBullet;
 	float timerItem;
-	Ship *ship;
-	std::vector<Meteor *> meteorArray;
-	std::vector<Bullet *> bulletArray;
-	std::vector<Star *> starArray;
+	Ship  *ship;
+
+	// Working on Pool Management
+	int meteorPoolIndex;
+	std::vector<Meteor *> meteorPool;
+
+	int bulletPoolIndex;
+	std::vector<Bullet *> bulletPool;
+
+	int starPoolIndex;
+	std::vector<Star *> starPool;
+
+	int itemPoolIndex;
+	std::vector<Item *> itemPool;
+
 	std::vector<Item *> itemArray;
 	ui::Button *settingsButton;
 	//ui::Button *soundBGMButton;
@@ -40,29 +51,31 @@ private:
 public:
 	GameScene();
 	~GameScene();
-public:
+
 	static Scene *createScene();
 	virtual bool init() override;
 	virtual void update(float delta) override;
 	virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent) override;
 	CREATE_FUNC(GameScene);
 
+	void createPools();
+	void deletePools();
+	void displayMeteor();
+	void displayBullet();
+	void displayStar(const Point &pos, int type);
+	void displayItem();
+
 	void checkBGMSettings();
 	void showSettings(Ref *sender, ui::Widget::TouchEventType type);
 	//void BGMListener(Ref *sender, ui::Widget::TouchEventType type);
 	void setParallaxBackground();
 	void displayGameOver(float delta);
-
 	bool onContactBegin(PhysicsContact &contact);
-	void shipCollision(Sprite *ship);
-	void meteorCollision(Sprite *meteor);
-	void bulletCollision(Sprite *bullet);
-	void starCollision(Sprite *star);
-	void itemCollision(Sprite *item);
-	void bulletUpdate();
-	void meteorUpdate();
-	void starUpdate();
-	void itemUpdate();
+	void shipCollision(Sprite *shipSprite);
+	void meteorCollision(int index);
+	void bulletCollision(int index);
+	void starCollision(int index);
+	void itemCollision(int index);
 	
 	/* Static Game Proprieties */
 	static int scorePoints;
@@ -78,5 +91,3 @@ public:
 	static void scaleDifficulty(Layer *layer);
 	static void setDefaultValue();
 };
-
-#endif // __GAMESCENE_H__

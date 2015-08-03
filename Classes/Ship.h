@@ -1,5 +1,4 @@
-#ifndef __SHIP_H__
-#define __SHIP_H__
+#pragma once
 
 #include <cstdlib>
 #include "cocos2d.h"
@@ -25,7 +24,7 @@ private:
 public:
 	Ship(Layer *layer);
 	virtual ~Ship() {}
-public:
+
 	int getLife() const;
 	void displayLife(Layer *layer, int shipIndex);
 	void shakeScreen(Layer *layer, float intensity);
@@ -34,18 +33,20 @@ public:
 	void reduceLife(Layer *layer);
 	void resetContact();
 	void scalingEffect();
+	void displayCollision(Layer *layer);
 	void displayExplosion(Layer *layer);
+
+	//Ship Touch Control
 	Point touchToPoint(Touch* touch);
 	void onTouchesBegan(const std::vector<Touch*>& touches, Event* event);
 	void onTouchesMoved(const std::vector<Touch*>& touches, Event* event);
 	void onTouchesEnded(const std::vector<Touch*>& touches, Event* event);
-	virtual int getType() const override;
-	virtual float getWidth() const override;
-	virtual float getHeight() const override;
-	virtual Sprite* getSprite() const override;
-	virtual Point getPosition() const override;
-	virtual float getPositionX() const override;
-	virtual float getPositionY() const override;
-};
 
-#endif // __SHIP_H__
+	virtual int getType() const override { return type; }
+	virtual float getWidth() const override { return width; }
+	virtual float getHeight() const override { return height; }
+	virtual Sprite *getSprite() const override { return sprite; }
+	virtual Point getPosition() const override { return sprite->getPosition(); }
+	virtual float getPositionX() const override { return sprite->getPositionX(); }
+	virtual float getPositionY() const override{ return sprite->getPositionY(); }
+};

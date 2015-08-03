@@ -1,5 +1,4 @@
-#ifndef __ENTITY_H__
-#define __ENTITY_H__
+#pragma once
 
 #include "cocos2d.h"
 
@@ -16,7 +15,7 @@ protected:
 public:
 	Entity() : type(0), width(0), height(0), sprite(nullptr), body(nullptr) {}
 	virtual ~Entity() {}
-public:
+
 	virtual int getType() const = 0;
 	virtual float getWidth() const = 0;
 	virtual float getHeight() const = 0;
@@ -25,5 +24,3 @@ public:
 	virtual float getPositionX() const = 0;
 	virtual float getPositionY() const = 0;
 };
-
-#endif // __ENTITY_H__

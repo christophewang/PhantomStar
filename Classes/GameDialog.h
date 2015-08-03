@@ -1,5 +1,4 @@
-#ifndef __GAMEDIALOG_H__
-#define __GAMEDIALOG_H__
+#pragma once
 
 #include "cocos2d.h"
 #include "Definitions.h"
@@ -8,17 +7,16 @@
 #include "cocostudio/CocoStudio.h"
 #include "SimpleAudioEngine.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class GameDialog : public Layer
 {
 public:
 	CREATE_FUNC(GameDialog);
-	virtual bool init();
+	virtual bool init() override;
+
 	void blockPassingTouch();
 	void setupUI();
 	void goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type);
 	void closeDialog(Ref *sender, ui::Widget::TouchEventType type);
 };
-
-#endif // __GAMEDIALOG_H__

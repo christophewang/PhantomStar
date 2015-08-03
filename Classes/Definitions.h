@@ -1,5 +1,4 @@
-#ifndef __DEFINITIONS_H__
-#define __DEFINITIONS_H__
+#pragma once
 
 /* Google Play */
 #define LINK "https://play.google.com/store/apps/details?id=com.wry.phantomstar"
@@ -11,11 +10,12 @@
 /* TAG */
 #define GAME_OBJECT 1
 #define DIALOG_OBJECT 2
+#define REPAIR_ITEM 3
 
-/* ITEM */
-#define REPAIR_ITEM 1
+/* POOL SIZE */
+#define OBJECT_POOL_SIZE 50
 
-/* INTENSITY */
+/* SHAKE INTENSITY */
 #define LEVEL_ONE -5.0f
 #define LEVEL_TWO -10.0f
 #define LEVEL_THREE -15.0f
@@ -33,13 +33,13 @@
 #define BODY_SHIP3 "PhysicsBodies/shipType3.json"
 
 /* AUDIO */
-#define AUDIO_STAR "Audio/star.wav"
-#define AUDIO_REPAIR "Audio/shipRepair.wav"
-#define AUDIO_COLLISION "Audio/collisionShip.wav"
-#define AUDIO_EXPLOSION "Audio/explosion.wav"
-#define AUDIO_SHIP_EXPLOSION "Audio/explosionShip.wav"
-#define AUDIO_BACKGROUND "Audio/bgm.mp3"
-#define AUDIO_GAMEOVER "Audio/gameover.mp3"
+//#define AUDIO_STAR "Audio/star.wav"
+//#define AUDIO_REPAIR "Audio/shipRepair.wav"
+//#define AUDIO_COLLISION "Audio/collisionShip.wav"
+//#define AUDIO_EXPLOSION "Audio/explosion.wav"
+//#define AUDIO_SHIP_EXPLOSION "Audio/explosionShip.wav"
+//#define AUDIO_BACKGROUND "Audio/bgm.mp3"
+//#define AUDIO_GAMEOVER "Audio/gameover.mp3"
 
 /* FONT */
 #define FONT "Fonts/kenvector_future_thin.ttf"
@@ -82,5 +82,3 @@
 #define GAME_MENU "GameMenu.csb"
 #define GAME_DIALOG "GameDialog.csb"
 #define GAMEOVER_DIALOG "GameOverDialog.csb"
-
-#endif // __DEFINITIONS_H__

@@ -58,7 +58,7 @@ void GameDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type)
 		this->removeFromParentAndCleanup(true);
 		Director::getInstance()->resume();
 		auto scene = MainMenuScene::createScene();
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHIP_EXPLOSION);
+		//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHIP_EXPLOSION);
 		Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
 	}
 }

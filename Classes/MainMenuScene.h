@@ -1,5 +1,4 @@
-#ifndef __MAINMENUSCENE_H__
-#define __MAINMENUSCENE_H__
+#pragma once
 
 #include <cstdlib>
 #include "cocos2d.h"
@@ -20,7 +19,8 @@ private:
 	Point origin;
 	Size visibleSize;
 	float timer;
-	std::vector<Meteor *> meteorArray;
+	int meteorPoolIndex;
+	std::vector<Meteor *> meteorPool;
 	CCParallaxScrollNode *parallaxBg;
 public:
 	static Scene* createScene();
@@ -29,12 +29,12 @@ public:
 	virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent) override;
 	CREATE_FUNC(MainMenuScene);
 	
-	void meteorUpdate();
+	void createPools();
+	void deletePools();
+	void displayMeteor();
 	void setParallaxBackground();
 	void rate(Ref *sender, ui::Widget::TouchEventType type);
 	void ranking(Ref *sender, ui::Widget::TouchEventType type);
 	void donation(Ref *sender, ui::Widget::TouchEventType type);
 	void goToGameScene(Ref* sender, ui::Widget::TouchEventType type);
 };
-
-#endif // __MAINMENUSCENE_H__

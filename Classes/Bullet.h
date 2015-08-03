@@ -1,5 +1,4 @@
-#ifndef __BULLET_H__
-#define __BULLET_H__
+#pragma once
 
 #include "cocos2d.h"
 #include "Entity.h"
@@ -9,17 +8,18 @@ using namespace cocos2d;
 class Bullet : public Entity
 {
 public:
-	Bullet(Layer *layer, Point pos, int type);
+	Bullet() {}
 	virtual ~Bullet() {}
-public:
-	void displayBulletImpact(Layer *layer);
-	virtual int getType() const override;
-	virtual float getWidth() const override;
-	virtual float getHeight() const override;
-	virtual Sprite* getSprite() const override;
-	virtual Point getPosition() const override;
-	virtual float getPositionX() const override;
-	virtual float getPositionY() const override;
-};
 
-#endif // __BULLET_H__
+	void runBullet(Layer *layer, int index, const Point &pos, int _type);
+	void resetBullet();
+	void displayBulletImpact(Layer *layer);
+
+	virtual int getType() const override { return type; }
+	virtual float getWidth() const override { return width; }
+	virtual float getHeight() const override { return height; }
+	virtual Sprite *getSprite() const override { return sprite; }
+	virtual Point getPosition() const override { return sprite->getPosition(); }
+	virtual float getPositionX() const override { return sprite->getPositionX(); }
+	virtual float getPositionY() const override{ return sprite->getPositionY(); }
+};

@@ -1,5 +1,4 @@
-#ifndef __APPDELEGATE_H__
-#define __APPDELEGATE_H__
+#pragma once
 
 #include "cocos2d.h"
 #include "Definitions.h"
@@ -16,5 +15,3 @@ public:
 	virtual void applicationDidEnterBackground() override;
 	virtual void applicationWillEnterForeground() override;
 };
-
-#endif // __APPDELEGATE_H__

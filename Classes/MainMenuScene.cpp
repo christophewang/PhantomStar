@@ -3,7 +3,7 @@
 
 Scene* MainMenuScene::createScene()
 {
-	auto scene = Scene::create();
+	auto scene = Scene::createWithPhysics();
 	auto layer = MainMenuScene::create();
 	scene->addChild(layer);
 	return scene;
@@ -40,9 +40,10 @@ bool MainMenuScene::init()
 	keybackListener->onKeyReleased = CC_CALLBACK_2(MainMenuScene::onKeyReleased, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(keybackListener, this);
 
-	this->setParallaxBackground();
-	this->scheduleUpdate();
-	this->addChild(menu, 4);
+	createPools();
+	setParallaxBackground();
+	scheduleUpdate();
+	addChild(menu, 4);
 	return true;
 }
 
@@ -62,39 +63,49 @@ void MainMenuScene::setParallaxBackground()
 	parallaxBg = CCParallaxScrollNode::create();
 	parallaxBg->addInfiniteScrollYWithZ(-1, Point(1, 1), Point(0, 0), bg1, bg2, NULL);
 
-	this->addChild(parallaxBg, 1);
+	addChild(parallaxBg);
 }
 
-void MainMenuScene::meteorUpdate()
+void MainMenuScene::createPools()
 {
-	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
-	{
-		if (this->meteorArray[i]->getPositionY() < origin.y)
-		{
-			this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->meteorArray[i];
-			this->meteorArray.erase(this->meteorArray.begin() + i);
-		}
-	}
+	meteorPoolIndex = 0;
+	for (unsigned int i = 0; i < OBJECT_POOL_SIZE; i++)
+		meteorPool.push_back(new Meteor());
+}
+
+void MainMenuScene::deletePools()
+{
+	for (unsigned int i = 0; i < OBJECT_POOL_SIZE; i++)
+		delete meteorPool.at(i);
+}
+
+void MainMenuScene::displayMeteor()
+{
+	auto meteor = meteorPool.at(meteorPoolIndex);
+	meteor->runMeteor(this, meteorPoolIndex, 0.002f);
+
+	meteorPoolIndex++;
+	if (meteorPoolIndex == meteorPool.size())
+		meteorPoolIndex = 0;
 }
 
 void MainMenuScene::update(float delta)
 {
-	this->timer += delta;
-	if (this->timer > 200.0f / this->visibleSize.width)
+	timer += delta;
+	if (timer > 200.0f / visibleSize.width)
 	{
-		this->timer = 0;
-		meteorArray.push_back(new Meteor(this, 0.002f));
-		this->meteorUpdate();
+		timer = 0;
+		displayMeteor();
 	}
-	this->parallaxBg->updateWithVelocity(Point(0, -0.01f * visibleSize.height), delta);
+	parallaxBg->updateWithVelocity(Point(0, -0.01f * visibleSize.height), delta);
 }
 
 void MainMenuScene::goToGameScene(Ref* sender, ui::Widget::TouchEventType type)
 {
 	if (type == ui::Widget::TouchEventType::BEGAN)
 	{
-		this->removeFromParentAndCleanup(true);
+		deletePools();
+		removeFromParentAndCleanup(true);
 		auto scene = GameScene::createScene();
 		Director::getInstance()->replaceScene(TransitionSlideInB::create(DELAY_TRANSITION, scene));
 	}
@@ -131,7 +142,8 @@ void MainMenuScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent)
 	if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
 	{
 		_eventDispatcher->removeAllEventListeners();
-		this->removeFromParentAndCleanup(true);
+		deletePools();
+		removeFromParentAndCleanup(true);
 		Director::getInstance()->getOpenGLView()->end();
 		Director::getInstance()->end();
 	}

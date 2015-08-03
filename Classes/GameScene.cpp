@@ -16,21 +16,25 @@ GameScene::GameScene()
 	GameScene::setDefaultValue();
 	def = UserDefault::getInstance();
 	ship = new Ship(this);
+	createPools();
 }
 
-GameScene::~GameScene()
+GameScene::~GameScene() 
 {
-	delete this->ship;
+	delete ship;
+	deletePools();
 }
 
 Scene* GameScene::createScene()
 {
 	auto scene = Scene::createWithPhysics();
 	auto layer = GameScene::create();
+	auto director = Director::getInstance();
 
 	layer->sceneWorld = scene->getPhysicsWorld();
 	/* Debug Mode */
 	//scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	director->setDisplayStats(true);
 	scene->addChild(layer);
 	return scene;
 }
@@ -56,7 +60,6 @@ bool GameScene::init()
 	highScoreLabel->setPosition(Point(visibleSize.width / 2 + origin.x,
 		visibleSize.height - visibleSize.height / 40 + origin.y));
 
-	//TODO Replace with option button
 	settingsButton = ui::Button::create();
 	settingsButton->loadTextures(OPTION, OPTION);
 	settingsButton->setPosition(Point(visibleSize.width - settingsButton->getContentSize().width / 2 + origin.x,
@@ -75,13 +78,46 @@ bool GameScene::init()
 	keybackListener->onKeyReleased = CC_CALLBACK_2(GameScene::onKeyReleased, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(keybackListener, this);
 
-	this->checkBGMSettings();
-	this->setParallaxBackground();
-	this->scheduleUpdate();
-	this->addChild(settingsButton, 3);
-	this->addChild(scoreLabel, 3);
-	this->addChild(highScoreLabel, 3);
+	checkBGMSettings();
+	setParallaxBackground();
+	scheduleUpdate();
+	addChild(settingsButton, 3);
+	addChild(scoreLabel, 3);
+	addChild(highScoreLabel, 3);
+
 	return true;
+}
+
+void GameScene::createPools()
+{
+	meteorPoolIndex = 0;
+	bulletPoolIndex = 0;
+	starPoolIndex = 0;
+	itemPoolIndex = 0;
+
+	meteorPool.reserve(OBJECT_POOL_SIZE);
+	bulletPool.reserve(OBJECT_POOL_SIZE);
+	starPool.reserve(OBJECT_POOL_SIZE);
+	itemPool.reserve(OBJECT_POOL_SIZE);
+
+	for (unsigned int i = 0; i < OBJECT_POOL_SIZE; i++)
+	{
+		meteorPool.push_back(new Meteor());
+		bulletPool.push_back(new Bullet());
+		starPool.push_back(new Star());
+		itemPool.push_back(new Item());
+	}
+}
+
+void GameScene::deletePools()
+{
+	for (unsigned int i = 0; i < OBJECT_POOL_SIZE; i++)
+	{
+		delete meteorPool.at(i);
+		delete bulletPool.at(i);
+		delete starPool.at(i);
+		delete itemPool.at(i);
+	}
 }
 
 void GameScene::checkBGMSettings()
@@ -89,7 +125,7 @@ void GameScene::checkBGMSettings()
 	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
 	if (!def->getBoolForKey(BGM_KEY, false))
 	{
-		CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_BACKGROUND, true);
+		//CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_BACKGROUND, true);
 		//soundBGMButton->loadTextures(MUSIC_ON, MUSIC_ON);
 	}
 	else
@@ -140,197 +176,187 @@ bool GameScene::onContactBegin(PhysicsContact &contact)
 	auto aSprite = static_cast<Sprite *>(a->getNode());
 	auto bSprite = static_cast<Sprite *>(b->getNode());
 
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_SHIP && b->getCollisionBitmask() == COLLISION_METEOR)
-		this->shipCollision(aSprite);
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_SHIP && a->getCollisionBitmask() == COLLISION_METEOR)
-		this->shipCollision(bSprite);
-
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_METEOR && b->getCollisionBitmask() == COLLISION_BULLET)
+	if (aSprite && bSprite &&
+		a->getCollisionBitmask() == COLLISION_SHIP &&
+		b->getCollisionBitmask() == COLLISION_METEOR)
 	{
-		this->meteorCollision(aSprite);
-		this->bulletCollision(bSprite);
+		shipCollision(aSprite);
+	}
+	else if (aSprite && bSprite &&
+		b->getCollisionBitmask() == COLLISION_SHIP &&
+		a->getCollisionBitmask() == COLLISION_METEOR)
+	{
+		shipCollision(bSprite);
 	}
 
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_METEOR && a->getCollisionBitmask() == COLLISION_BULLET)
+	if (aSprite && bSprite && 
+		a->getCollisionBitmask() == COLLISION_METEOR && 
+		b->getCollisionBitmask() == COLLISION_BULLET)
 	{
-		this->meteorCollision(bSprite);
-		this->bulletCollision(bSprite);
+		meteorCollision(a->getTag());
+		bulletCollision(b->getTag());
+	}
+	else if (aSprite && bSprite && 
+		b->getCollisionBitmask() == COLLISION_METEOR && 
+		a->getCollisionBitmask() == COLLISION_BULLET)
+	{
+		meteorCollision(b->getTag());
+		bulletCollision(a->getTag());
 	}
 
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_STAR && b->getCollisionBitmask() == COLLISION_SHIP)
-		this->starCollision(aSprite);
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_STAR && a->getCollisionBitmask() == COLLISION_SHIP)
-		this->starCollision(bSprite);
-
-	if (aSprite && bSprite && a->getCollisionBitmask() == COLLISION_ITEM && b->getCollisionBitmask() == COLLISION_SHIP)
-		this->itemCollision(aSprite);
-	else if (aSprite && bSprite && b->getCollisionBitmask() == COLLISION_ITEM && a->getCollisionBitmask() == COLLISION_SHIP)
-		this->itemCollision(bSprite);
+	if (aSprite && bSprite &&
+		a->getCollisionBitmask() == COLLISION_STAR &&
+		b->getCollisionBitmask() == COLLISION_SHIP)
+	{
+		starCollision(a->getTag());
+	}
+	else if (aSprite && bSprite &&
+		b->getCollisionBitmask() == COLLISION_STAR &&
+		a->getCollisionBitmask() == COLLISION_SHIP)
+	{
+		starCollision(b->getTag());
+	}
+		
+	if (aSprite && bSprite &&
+		a->getCollisionBitmask() == COLLISION_ITEM &&
+		b->getCollisionBitmask() == COLLISION_SHIP)
+	{
+		itemCollision(a->getTag());
+	}
+	else if (aSprite && bSprite &&
+		b->getCollisionBitmask() == COLLISION_ITEM &&
+		a->getCollisionBitmask() == COLLISION_SHIP)
+	{
+		itemCollision(b->getTag());
+	}
 	return true;
 }
 
-void GameScene::shipCollision(Sprite *ship)
+void GameScene::shipCollision(Sprite *shipSprite)
 {
-	this->ship->reduceLife(this);
-	if (this->ship->getLife() <= 0)
+	ship->reduceLife(this);
+	if (ship->getLife() <= 0)
 	{
-		this->ship->displayExplosion(this);
-		this->ship->getSprite()->removeFromParentAndCleanup(true);
-		this->getEventDispatcher()->removeAllEventListeners();
-		this->unscheduleAllCallbacks();
-		this->scheduleOnce(schedule_selector(GameScene::displayGameOver), 2.0f);
+		ship->displayExplosion(this);
+		ship->getSprite()->removeFromParentAndCleanup(true);
+		getEventDispatcher()->removeAllEventListeners();
+		unscheduleAllCallbacks();
+		scheduleOnce(schedule_selector(GameScene::displayGameOver), 2.0f);
 	}
 }
 
-void GameScene::meteorCollision(Sprite *meteor)
+void GameScene::meteorCollision(int index)
 {
-	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
+	auto meteor = meteorPool.at(index);
+	if (meteor->getType() != 0)
 	{
-		if (this->meteorArray[i]->getSprite() == meteor && this->meteorArray[i]->getType())
-		{
-			this->meteorArray[i]->displayExplosion(this);
-			starArray.push_back(new Star(this, this->meteorArray[i]->getPosition(), this->meteorArray[i]->getType()));
-			this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->meteorArray[i];
-			this->meteorArray.erase(this->meteorArray.begin() + i);
-		}
+		displayStar(meteor->getPosition(), meteor->getType());
+		meteor->displayExplosion(this);
+		meteor->resetMeteor();
 	}
 }
 
-void GameScene::bulletCollision(Sprite *bullet)
+void GameScene::bulletCollision(int index)
 {
-	for (unsigned int i = 0; i < this->bulletArray.size(); ++i)
+	auto bullet = bulletPool.at(index);
+	bullet->displayBulletImpact(this);
+	bullet->resetBullet();
+}
+
+void GameScene::starCollision(int index)
+{
+	auto star = starPool.at(index);
+	switch (star->getType())
 	{
-		if (this->bulletArray[i]->getSprite() == bullet)
-		{
-			this->bulletArray[i]->displayBulletImpact(this);
-			this->bulletArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->bulletArray[i];
-			this->bulletArray.erase(this->bulletArray.begin() + i);
-		}
+	case 1:
+		GameScene::incrementScore(50);
+		break;
+	case 2:
+		GameScene::incrementScore(100);
+		break;
+	case 3:
+		GameScene::incrementScore(200);
+		break;
+	}
+	star->displayStarEffect(this);
+	star->resetStar();
+}
+
+void GameScene::itemCollision(int index)
+{
+	auto item = itemPool.at(index);
+	if (item->getType() == REPAIR_ITEM)
+	{
+		ship->incrementLife(this);
+		item->displayItemEffect(this);
+		item->resetItem();
 	}
 }
 
-void GameScene::starCollision(Sprite *star)
+void GameScene::displayMeteor()
 {
-	for (unsigned int i = 0; i < this->starArray.size(); ++i)
-	{
-		if (this->starArray[i]->getSprite() == star)
-		{
-			auto type = this->starArray[i]->getType();
-			if (type == 1)
-				GameScene::incrementScore(50);
-			else if (type == 2)
-				GameScene::incrementScore(100);
-			else if (type == 3)
-				GameScene::incrementScore(200);
-			this->starArray[i]->displayStarEffect(this);
-			this->starArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->starArray[i];
-			this->starArray.erase(this->starArray.begin() + i);
-		}
-	}
+	auto meteor = meteorPool.at(meteorPoolIndex);
+	meteor->runMeteor(this, meteorPoolIndex, GameScene::speedMeteor);
+	meteorPoolIndex++;
+	if (meteorPoolIndex == meteorPool.size())
+		meteorPoolIndex = 0;
 }
 
-void GameScene::itemCollision(Sprite* item)
+void GameScene::displayBullet()
 {
-	for (unsigned int i = 0; i < this->itemArray.size(); ++i)
-	{
-		if (this->itemArray[i]->getSprite() == item)
-		{
-			auto type = this->itemArray[i]->getType();
-			if (type == REPAIR_ITEM)
-				this->ship->incrementLife(this);
-			this->itemArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->itemArray[i];
-			this->itemArray.erase(this->itemArray.begin() + i);
-		}
-	}
+	auto bullet = bulletPool.at(bulletPoolIndex);
+	bullet->runBullet(this, bulletPoolIndex, ship->getPosition(), ship->getType());
+	bulletPoolIndex++;
+	if (bulletPoolIndex == bulletPool.size())
+		bulletPoolIndex = 0;
 }
 
-void GameScene::meteorUpdate()
+void GameScene::displayStar(const Point &pos, int type)
 {
-	for (unsigned int i = 0; i < this->meteorArray.size(); ++i)
-	{
-		if (this->meteorArray[i]->getPositionY() < origin.y)
-		{
-			this->meteorArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->meteorArray[i];
-			this->meteorArray.erase(this->meteorArray.begin() + i);
-		}
-	}
+	auto star = starPool.at(starPoolIndex);
+	star->runStar(this, starPoolIndex, pos, type);
+	starPoolIndex++;
+	if (starPoolIndex == starPool.size())
+		starPoolIndex = 0;
 }
 
-void GameScene::bulletUpdate()
+void GameScene::displayItem()
 {
-	for (unsigned int i = 0; i < this->bulletArray.size(); ++i)
-	{
-		if (this->bulletArray[i]->getPositionY() > this->visibleSize.height + origin.y)
-		{
-			this->bulletArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->bulletArray[i];
-			this->bulletArray.erase(this->bulletArray.begin() + i);
-		}
-	}
-}
-
-void GameScene::starUpdate()
-{
-	for (unsigned int i = 0; i < this->starArray.size(); ++i)
-	{
-		if (this->starArray[i]->getPositionY() < origin.y)
-		{
-			this->starArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->starArray[i];
-			this->starArray.erase(this->starArray.begin() + i);
-		}
-	}
-}
-
-void GameScene::itemUpdate()
-{
-	for (unsigned int i = 0; i < this->itemArray.size(); ++i)
-	{
-		if (this->itemArray[i]->getPositionY() < origin.y)
-		{
-			this->itemArray[i]->getSprite()->removeFromParentAndCleanup(true);
-			delete this->itemArray[i];
-			this->itemArray.erase(this->itemArray.begin() + i);
-		}
-	}
+	auto item = itemPool.at(itemPoolIndex);
+	item->runItem(this, itemPoolIndex);
+	itemPoolIndex++;
+	if (itemPoolIndex == itemPool.size())
+		itemPoolIndex = 0;
 }
 
 void GameScene::update(float delta)
 {
-	this->timerMeteor += delta;
-	if (this->timerMeteor > GameScene::frequencyMeteor / this->visibleSize.width)
+	timerMeteor += delta;
+	if (timerMeteor > GameScene::frequencyMeteor / visibleSize.width)
 	{
-		this->timerMeteor = 0;
-		meteorArray.push_back(new Meteor(this));
-		this->meteorUpdate();
-		this->starUpdate();
+		timerMeteor = 0;
+		displayMeteor();
 	}
 
-	this->timerBullet += delta;
-	if (this->timerBullet > GameScene::frequencyBullet / this->visibleSize.height)
+	timerBullet += delta;
+	if (timerBullet > GameScene::frequencyBullet / visibleSize.height)
 	{
-		this->timerBullet = 0;
-		bulletArray.push_back(new Bullet(this, this->ship->getPosition(), this->ship->getType()));
-		this->bulletUpdate();
+		timerBullet = 0;
+		displayBullet();
 	}
 
-	this->timerItem += delta;
-	if (this->timerItem > GameScene::frequencyItem / this->visibleSize.height)
+	timerItem += delta;
+	if (timerItem > GameScene::frequencyItem / visibleSize.height)
 	{
-		this->timerItem = 0;
-		itemArray.push_back(new Item(this));
-		this->itemUpdate();
+		timerItem = 0;
+		displayItem();
 	}
 
 	std::stringstream score;
 	score << GameScene::scorePoints;
-	this->scoreLabel->setString(score.str());
-	this->parallaxBg->updateWithVelocity(Point(0, GameScene::speedBackground * visibleSize.height), delta);
+	scoreLabel->setString(score.str());
+	parallaxBg->updateWithVelocity(
+		Point(0, GameScene::speedBackground * visibleSize.height), delta);
 	GameScene::scaleDifficulty(this);
 }
 
@@ -377,15 +403,16 @@ void GameScene::displayGameOver(float delta)
 	if (!def->getBoolForKey(BGM_KEY, false))
 	{
 		CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
-		CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_GAMEOVER, true);
+		//CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_GAMEOVER, true);
 	}
 
-	this->scoreLabel->setVisible(false);
-	this->highScoreLabel->setVisible(false);
+	scoreLabel->setVisible(false);
+	highScoreLabel->setVisible(false);
 	auto gameOverDialog = GameOverDialog::create();
-	this->addChild(gameOverDialog, 4, DIALOG_OBJECT);
+	addChild(gameOverDialog, 4, DIALOG_OBJECT);
 }
 
+// REMOVE DUPLICATE
 void GameScene::showSettings(Ref* sender, ui::Widget::TouchEventType type)
 {
 	if (type == ui::Widget::TouchEventType::BEGAN)
@@ -396,11 +423,11 @@ void GameScene::showSettings(Ref* sender, ui::Widget::TouchEventType type)
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
 			auto gameDialog = GameDialog::create();
-			this->addChild(gameDialog, 4, DIALOG_OBJECT);
+			addChild(gameDialog, 4, DIALOG_OBJECT);
 		}
 		else if (Director::getInstance()->isPaused())
 		{
-			this->removeChildByTag(DIALOG_OBJECT, true);
+			removeChildByTag(DIALOG_OBJECT, true);
 			Director::getInstance()->resume();
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
@@ -418,11 +445,11 @@ void GameScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent)
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
 			auto gameDialog = GameDialog::create();
-			this->addChild(gameDialog, 4, DIALOG_OBJECT);
+			addChild(gameDialog, 4, DIALOG_OBJECT);
 		}
 		else if (Director::getInstance()->isPaused())
 		{
-			this->removeChildByTag(DIALOG_OBJECT, true);
+			removeChildByTag(DIALOG_OBJECT, true);
 			Director::getInstance()->resume();
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();

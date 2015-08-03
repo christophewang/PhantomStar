@@ -1,5 +1,4 @@
-#ifndef __METEOR_H__
-#define __METEOR_H__
+#pragma once
 
 #include <cstdlib>
 #include "cocos2d.h"
@@ -7,23 +6,23 @@
 #include "Entity.h"
 #include "SimpleAudioEngine.h"
 
-USING_NS_CC;
+using namespace cocos2d;
 
 class Meteor : public Entity
 {
 public:
-	Meteor(Layer *layer);
-	Meteor(Layer *layer, float speed);
+	Meteor() {}
 	virtual ~Meteor() {}
-public:
-	void displayExplosion(Layer *layer);
-	virtual int getType() const override;
-	virtual float getWidth() const;
-	virtual float getHeight() const;
-	virtual cocos2d::Sprite *getSprite() const;
-	virtual Point getPosition() const;
-	virtual float getPositionX() const;
-	virtual float getPositionY() const;
-};
 
-#endif // __METEOR_H__
+	void runMeteor(Layer *layer, int index, float speed);
+	void resetMeteor();
+	void displayExplosion(Layer *layer);
+
+	virtual int getType() const override { return type; }
+	virtual float getWidth() const override { return width; }
+	virtual float getHeight() const override { return height; }
+	virtual Sprite *getSprite() const override { return sprite; }
+	virtual Point getPosition() const override { return sprite->getPosition(); }
+	virtual float getPositionX() const override { return sprite->getPositionX(); }
+	virtual float getPositionY() const override{ return sprite->getPositionY(); }
+};
