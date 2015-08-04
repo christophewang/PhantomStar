@@ -33,21 +33,17 @@ private:
 
 	// Working on Pool Management
 	int meteorPoolIndex;
-	std::vector<Meteor *> meteorPool;
-
 	int bulletPoolIndex;
-	std::vector<Bullet *> bulletPool;
-
 	int starPoolIndex;
-	std::vector<Star *> starPool;
-
 	int itemPoolIndex;
+	std::vector<Meteor *> meteorPool;
+	std::vector<Bullet *> bulletPool;
+	std::vector<Star *> starPool;
 	std::vector<Item *> itemPool;
 
-	std::vector<Item *> itemArray;
+	// Settings
 	ui::Button *settingsButton;
-	//ui::Button *soundBGMButton;
-	UserDefault *def;
+	UserDefault *userData;
 public:
 	GameScene();
 	~GameScene();
@@ -65,9 +61,9 @@ public:
 	void displayStar(const Point &pos, int type);
 	void displayItem();
 
-	void checkBGMSettings();
-	void showSettings(Ref *sender, ui::Widget::TouchEventType type);
-	//void BGMListener(Ref *sender, ui::Widget::TouchEventType type);
+	void checkSoundsSettings();
+	void onClickSettings(Ref *sender, ui::Widget::TouchEventType type);
+	void showGameDialog();
 	void setParallaxBackground();
 	void displayGameOver(float delta);
 	bool onContactBegin(PhysicsContact &contact);
@@ -90,4 +86,5 @@ public:
 	static void incrementScore(int value);
 	static void scaleDifficulty(Layer *layer);
 	static void setDefaultValue();
+	static void playEffect(const char *path);
 };

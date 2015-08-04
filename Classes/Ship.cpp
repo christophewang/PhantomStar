@@ -1,5 +1,6 @@
 #include "Ship.h"
 #include "BodyParser.h"
+#include "GameScene.h"
 
 Ship::Ship(Layer *layer)
 {
@@ -198,20 +199,20 @@ void Ship::scalingEffect()
 
 void Ship::displayCollision(Layer *layer)
 {
-	//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_COLLISION);
 	auto shipCollision = ParticleSystemQuad::create(SHIP_COLLISION);
 	shipCollision->setPosition(Point(getPositionX(), getPositionY() - getHeight() / 2));
 	shipCollision->setAutoRemoveOnFinish(true);
 	layer->addChild(shipCollision, 2);
+	GameScene::playEffect(AUDIO_SHIP_COLLISION);
 }
 
 void Ship::displayExplosion(Layer *layer)
 {
-	//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHIP_EXPLOSION);
 	auto shipExplosion = ParticleSystemQuad::create(SHIP_EXPLOSION);
 	shipExplosion->setPosition(getPosition());
 	shipExplosion->setAutoRemoveOnFinish(true);
 	layer->addChild(shipExplosion, 2);
+	GameScene::playEffect(AUDIO_SHIP_EXPLOSION);
 }
 
 Point Ship::touchToPoint(Touch* touch)

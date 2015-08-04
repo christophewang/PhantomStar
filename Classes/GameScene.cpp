@@ -14,7 +14,7 @@ GameScene::GameScene()
 	: timerMeteor(0), timerBullet(0), timerItem(0)
 {
 	GameScene::setDefaultValue();
-	def = UserDefault::getInstance();
+	userData = UserDefault::getInstance();
 	ship = new Ship(this);
 	createPools();
 }
@@ -54,7 +54,7 @@ bool GameScene::init()
 		visibleSize.height - visibleSize.height / 15 + origin.y));
 
 	std::stringstream highScore;
-	highScore << "Best: " << def->getIntegerForKey(HIGHSCORE_KEY, 0);
+	highScore << "Best: " << userData->getIntegerForKey(HIGHSCORE_KEY, 0);
 	highScoreLabel = Label::createWithTTF(highScore.str(), FONT, visibleSize.height / 40);
 	highScoreLabel->setAlignment(TextHAlignment::CENTER);
 	highScoreLabel->setPosition(Point(visibleSize.width / 2 + origin.x,
@@ -64,11 +64,7 @@ bool GameScene::init()
 	settingsButton->loadTextures(OPTION, OPTION);
 	settingsButton->setPosition(Point(visibleSize.width - settingsButton->getContentSize().width / 2 + origin.x,
 		visibleSize.height - settingsButton->getContentSize().height / 2 + origin.y));
-	settingsButton->addTouchEventListener(CC_CALLBACK_2(GameScene::showSettings, this));
-	/*soundBGMButton = ui::Button::create();
-	soundBGMButton->setPosition(Point(visibleSize.width - soundBGMButton->getContentSize().width / 2 + origin.x,
-		visibleSize.height - soundBGMButton->getContentSize().height / 2 + origin.y));
-	soundBGMButton->addTouchEventListener(CC_CALLBACK_2(GameScene::BGMListener, this));*/
+	settingsButton->addTouchEventListener(CC_CALLBACK_2(GameScene::onClickSettings, this));
 
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::onContactBegin, this);
@@ -78,7 +74,7 @@ bool GameScene::init()
 	keybackListener->onKeyReleased = CC_CALLBACK_2(GameScene::onKeyReleased, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(keybackListener, this);
 
-	checkBGMSettings();
+	checkSoundsSettings();
 	setParallaxBackground();
 	scheduleUpdate();
 	addChild(settingsButton, 3);
@@ -120,39 +116,24 @@ void GameScene::deletePools()
 	}
 }
 
-void GameScene::checkBGMSettings()
+void GameScene::playEffect(const char *path)
 {
-	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
-	if (!def->getBoolForKey(BGM_KEY, false))
+	if (UserDefault::getInstance()->getBoolForKey(EFFECT_KEY))
 	{
-		//CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_BACKGROUND, true);
-		//soundBGMButton->loadTextures(MUSIC_ON, MUSIC_ON);
+		auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
+		audio->playEffect(path);
 	}
-	else
-	{
-		//soundBGMButton->loadTextures(MUSIC_OFF, MUSIC_OFF);
-	}
-
 }
 
-/*void GameScene::BGMListener(Ref *Sender, ui::Widget::TouchEventType type)
+void GameScene::checkSoundsSettings()
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
-	{
-		if (!def->getBoolForKey(BGM_KEY, false))
-		{
-			def->setBoolForKey(BGM_KEY, true);
-			soundBGMButton->loadTextures(MUSIC_OFF, MUSIC_OFF);
-			CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic(true);
-		}
-		else
-		{
-			def->setBoolForKey(BGM_KEY, false);
-			soundBGMButton->loadTextures(MUSIC_ON, MUSIC_ON);
-			CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_BACKGROUND, true);
-		}
-	}
-}*/
+	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
+
+	if (userData->getBoolForKey(BGM_KEY))
+		audio->playBackgroundMusic(AUDIO_BACKGROUND, true);
+	else
+		audio->stopBackgroundMusic(true);
+}
 
 void GameScene::setParallaxBackground()
 {
@@ -400,38 +381,47 @@ void GameScene::setDefaultValue()
 
 void GameScene::displayGameOver(float delta)
 {
-	if (!def->getBoolForKey(BGM_KEY, false))
-	{
-		CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
-		//CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic(AUDIO_GAMEOVER, true);
-	}
+	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
 
+	audio->stopAllEffects();
+	audio->stopBackgroundMusic();
 	scoreLabel->setVisible(false);
 	highScoreLabel->setVisible(false);
 	auto gameOverDialog = GameOverDialog::create();
 	addChild(gameOverDialog, 4, DIALOG_OBJECT);
 }
 
-// REMOVE DUPLICATE
-void GameScene::showSettings(Ref* sender, ui::Widget::TouchEventType type)
+void GameScene::showGameDialog()
+{
+	if (!Director::getInstance()->isPaused())
+	{
+		Director::getInstance()->pause();
+
+		if (userData->getBoolForKey(BGM_KEY))
+			CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+		if (userData->getBoolForKey(EFFECT_KEY))
+			CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
+
+		auto gameDialog = GameDialog::create();
+		addChild(gameDialog, 4, DIALOG_OBJECT);
+	}
+	else if (Director::getInstance()->isPaused())
+	{
+		removeChildByTag(DIALOG_OBJECT, true);
+		Director::getInstance()->resume();
+
+		if (userData->getBoolForKey(BGM_KEY))
+			CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+		if (userData->getBoolForKey(EFFECT_KEY))
+			CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
+	}
+}
+
+void GameScene::onClickSettings(Ref* sender, ui::Widget::TouchEventType type)
 {
 	if (type == ui::Widget::TouchEventType::BEGAN)
 	{
-		if (!Director::getInstance()->isPaused())
-		{
-			Director::getInstance()->pause();
-			CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
-			CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
-			auto gameDialog = GameDialog::create();
-			addChild(gameDialog, 4, DIALOG_OBJECT);
-		}
-		else if (Director::getInstance()->isPaused())
-		{
-			removeChildByTag(DIALOG_OBJECT, true);
-			Director::getInstance()->resume();
-			CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-			CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
-		}
+		showGameDialog();
 	}
 }
 
@@ -439,20 +429,6 @@ void GameScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *pEvent)
 {
 	if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
 	{
-		if (!Director::getInstance()->isPaused())
-		{
-			Director::getInstance()->pause();
-			CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
-			CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
-			auto gameDialog = GameDialog::create();
-			addChild(gameDialog, 4, DIALOG_OBJECT);
-		}
-		else if (Director::getInstance()->isPaused())
-		{
-			removeChildByTag(DIALOG_OBJECT, true);
-			Director::getInstance()->resume();
-			CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-			CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
-		}
+		showGameDialog();
 	}
 }

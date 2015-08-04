@@ -4,8 +4,9 @@ bool GameDialog::init()
 {
 	if (!Node::init())
 		return false;
-	this->blockPassingTouch();
-	this->setupUI();
+	userData = UserDefault::getInstance();
+	blockPassingTouch();
+	setupUI();
 	return true;
 }
 
@@ -30,35 +31,86 @@ void GameDialog::setupUI()
 	auto dialogBackground = gameDialog->getChildByName("dialogBackground");
 	
 	dialogBackground->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
-	ui::Button *resumeButton = static_cast<ui::Button*>(dialogBackground->getChildByName("resumeButton"));
-	resumeButton->setTouchEnabled(true);
+
+	bgmCheckBox = static_cast<ui::CheckBox*>(dialogBackground->getChildByName("bgmCheck"));
+	bgmCheckBox->setSelected(userData->getBoolForKey(BGM_KEY));
+	bgmCheckBox->addTouchEventListener(CC_CALLBACK_2(GameDialog::bgmListener, this));
+
+	effectCheckBox = static_cast<ui::CheckBox*>(dialogBackground->getChildByName("effectCheck"));
+	effectCheckBox->setSelected(userData->getBoolForKey(EFFECT_KEY));
+	effectCheckBox->addTouchEventListener(CC_CALLBACK_2(GameDialog::effectListener, this));
+
+	auto resumeButton = static_cast<ui::Button*>(dialogBackground->getChildByName("resumeButton"));
 	resumeButton->addTouchEventListener(CC_CALLBACK_2(GameDialog::closeDialog, this));
-	
-	ui::Button *menuButton = static_cast<ui::Button*>(dialogBackground->getChildByName("menuButton"));
-	menuButton->setTouchEnabled(true);
+
+	auto menuButton = static_cast<ui::Button*>(dialogBackground->getChildByName("menuButton"));
 	menuButton->addTouchEventListener(CC_CALLBACK_2(GameDialog::goToMainMenuScene, this));
-	this->addChild(gameDialog, 4);
+	addChild(gameDialog, 4);
+}
+
+void GameDialog::bgmListener(Ref* sender, ui::Widget::TouchEventType type)
+{
+	if (type == ui::Widget::TouchEventType::ENDED)
+	{
+		if (bgmCheckBox->isSelected())
+			userData->setBoolForKey(BGM_KEY, false);
+		else
+			userData->setBoolForKey(BGM_KEY, true);
+	}
+}
+
+void GameDialog::effectListener(Ref* sender, ui::Widget::TouchEventType type)
+{
+	if (type == ui::Widget::TouchEventType::ENDED)
+	{
+		if (effectCheckBox->isSelected())
+			userData->setBoolForKey(EFFECT_KEY, false);
+		else
+			userData->setBoolForKey(EFFECT_KEY, true);
+	}
 }
 
 void GameDialog::closeDialog(Ref *sender, ui::Widget::TouchEventType type)
 {
+	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
+
 	if (type == ui::Widget::TouchEventType::BEGAN)
 	{
-		this->removeFromParentAndCleanup(true);
+		removeFromParentAndCleanup(true);
 		Director::getInstance()->resume();
-		CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-		CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
+
+		if (userData->getBoolForKey(BGM_KEY))
+		{
+			if (audio->isBackgroundMusicPlaying())
+				audio->resumeBackgroundMusic();
+			else
+				audio->playBackgroundMusic(AUDIO_BACKGROUND, true);
+		}
+		else
+			audio->stopBackgroundMusic();
+		
+		if (userData->getBoolForKey(EFFECT_KEY))
+			audio->resumeAllEffects();
+		else
+			audio->stopAllEffects();
 	}
 }
 
 void GameDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type)
 {
+	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
+
 	if (type == ui::Widget::TouchEventType::BEGAN)
 	{
-		this->removeFromParentAndCleanup(true);
+		removeFromParentAndCleanup(true);
 		Director::getInstance()->resume();
 		auto scene = MainMenuScene::createScene();
-		//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_SHIP_EXPLOSION);
+
+		audio->stopBackgroundMusic(true);
+		audio->stopAllEffects();
+		if (userData->getBoolForKey(EFFECT_KEY))
+			audio->playEffect(AUDIO_SHIP_EXPLOSION);
+
 		Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
 	}
 }

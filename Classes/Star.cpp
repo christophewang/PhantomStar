@@ -53,10 +53,10 @@ void Star::resetStar()
 
 void Star::displayStarEffect(Layer *layer)
 {
-	//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_STAR);
 	auto starPath = __String::createWithFormat(STAR_EFFECT, type);
 	auto starEffect = ParticleSystemQuad::create(starPath->getCString());
 	starEffect->setPosition(getPosition());
 	starEffect->setAutoRemoveOnFinish(true);
 	layer->addChild(starEffect, 2);
+	GameScene::playEffect(AUDIO_STAR);
 }

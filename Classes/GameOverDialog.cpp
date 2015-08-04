@@ -6,8 +6,8 @@ bool GameOverDialog::init()
 	if (!Layer::init())
 		return false;
 	
-	this->blockPassingTouch();
-	this->setupUI();
+	blockPassingTouch();
+	setupUI();
 	return true;
 }
 
@@ -33,20 +33,19 @@ void GameOverDialog::setupUI()
 	dialogBackground->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
 	auto highScoreLabel = static_cast<ui::Text *>(dialogBackground->getChildByName("highScoreLabel"));
-	highScoreLabel->setString(String::createWithFormat("Best: %d", this->checkHighScore())->getCString());
+	highScoreLabel->setString(String::createWithFormat("Best: %d", checkHighScore())->getCString());
 
 	auto scoreLabel = static_cast<ui::Text *>(dialogBackground->getChildByName("scoreLabel"));
 	scoreLabel->setString(String::createWithFormat("Current: %d", GameScene::scorePoints)->getCString());
 
 	auto resumeButton = static_cast<ui::Button*>(dialogBackground->getChildByName("retryButton"));
-	resumeButton->setTouchEnabled(true);
 	resumeButton->addTouchEventListener(CC_CALLBACK_2(GameOverDialog::goToGameScene, this));
 
 	auto menuButton = static_cast<ui::Button*>(dialogBackground->getChildByName("menuButton"));
-	menuButton->setTouchEnabled(true);
 	menuButton->addTouchEventListener(CC_CALLBACK_2(GameOverDialog::goToMainMenuScene, this));
 	this->addChild(gameOverDialog, 4);
-	/* Google Play Input Score */
+	
+	//Google Play Input Score
 	if (NativeUtils::isSignedIn())
 		NativeUtils::submitScore(RANKING, GameScene::scorePoints);
 }
@@ -55,7 +54,7 @@ void GameOverDialog::goToGameScene(Ref *sender, ui::Widget::TouchEventType type)
 {
 	if (type == ui::Widget::TouchEventType::BEGAN)
 	{
-		this->removeFromParentAndCleanup(true);
+		removeFromParentAndCleanup(true);
 		auto scene = GameScene::createScene();
 		Director::getInstance()->replaceScene(TransitionSlideInB::create(DELAY_TRANSITION, scene));
 	}
@@ -65,7 +64,7 @@ void GameOverDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType t
 {
 	if (type == ui::Widget::TouchEventType::BEGAN)
 	{
-		this->removeFromParentAndCleanup(true);
+		removeFromParentAndCleanup(true);
 		auto scene = MainMenuScene::createScene();
 		Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
 	}
@@ -73,13 +72,13 @@ void GameOverDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType t
 
 int GameOverDialog::checkHighScore()
 {
-	auto def = UserDefault::getInstance();
+	auto userData = UserDefault::getInstance();
 
-	auto highScore = def->getIntegerForKey(HIGHSCORE_KEY, 0);
+	auto highScore = userData->getIntegerForKey(HIGHSCORE_KEY, 0);
 	if (GameScene::scorePoints > highScore)
 	{
 		highScore = GameScene::scorePoints;
-		def->setIntegerForKey(HIGHSCORE_KEY, highScore);
+		userData->setIntegerForKey(HIGHSCORE_KEY, highScore);
 	}
 	return highScore;
 }

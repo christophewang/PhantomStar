@@ -35,7 +35,7 @@ void CCParallaxScrollNode::updateWithVelocity(Point vel, float dt)
     CCParallaxScrollOffset *scrollOffset = (CCParallaxScrollOffset*) _scrollOffsets.at(i);
 		Point relVel = scrollOffset->getRelVelocity() * PTM_RATIO;
 		Point totalVel = vel + relVel;
-		Point offset = ccpCompMult((totalVel * dt), scrollOffset->getRatio());
+		Point offset = Point((totalVel.x * dt) * scrollOffset->getRatio().x, (totalVel.y * dt) * scrollOffset->getRatio().y);
     
     Node *child = scrollOffset->getTheChild();
 		child->setPosition(child->getPosition() + offset);

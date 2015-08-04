@@ -14,11 +14,13 @@ bool MainMenuScene::init()
 	if (!Layer::init())
 		return false;
 	timer = 0.0f;
+
 	visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
 
 	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
 	CocosDenshion::SimpleAudioEngine::getInstance()->stopAllEffects();
+
 	auto menu = CSLoader::createNode(GAME_MENU);
 	menu->setAnchorPoint(Point(0.5, 0.5));
 	menu->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));

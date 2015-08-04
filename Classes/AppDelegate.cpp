@@ -13,7 +13,7 @@ bool AppDelegate::applicationDidFinishLaunching()
 
 	if (!glview)
 	{
-		/* Computer Resolution */
+		//Computer Resolution
 		glview = GLViewImpl::create("Phantom Star");
 		glview->setFrameSize(480, 800);
 		director->setOpenGLView(glview);
@@ -23,16 +23,15 @@ bool AppDelegate::applicationDidFinishLaunching()
 	glview->setDesignResolutionSize(540, 960, ResolutionPolicy::FIXED_HEIGHT);
 
 	//TODO Sprite resolution
-	/* Preload Sounds and BGM */
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_STAR);
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_REPAIR);
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_EXPLOSION);
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_COLLISION);
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_SHIP_EXPLOSION);
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(AUDIO_BACKGROUND);
-	//CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(AUDIO_GAMEOVER);
+	//Preload Sound Effects and BGM
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_STAR);
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_REPAIR);
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_METEOR_EXPLOSION);
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_SHIP_COLLISION);
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect(AUDIO_SHIP_EXPLOSION);
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic(AUDIO_BACKGROUND);
 
-	/* Preload Sprite in Cache */
+	//Preload Sprite in Cache
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("spriteSheet.plist", "spriteSheet.png");
 
 	auto scene = MainMenuScene::createScene();

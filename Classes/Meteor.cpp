@@ -65,9 +65,9 @@ void Meteor::resetMeteor()
 
 void Meteor::displayExplosion(Layer *layer)
 {
-	//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_EXPLOSION);
 	auto explosion = ParticleSystemQuad::create(METEOR_EXPLOSION);
 	explosion->setPosition(getPosition());
 	explosion->setAutoRemoveOnFinish(true);
 	layer->addChild(explosion, 2);
+	GameScene::playEffect(AUDIO_METEOR_EXPLOSION);
 }

@@ -42,9 +42,9 @@ void Item::resetItem()
 
 void Item::displayItemEffect(Layer *layer)
 {
-	//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(AUDIO_REPAIR);
 	auto shipRepair = ParticleSystemQuad::create(SHIP_REPAIR);
 	shipRepair->setPosition(getPosition());
 	shipRepair->setAutoRemoveOnFinish(true);
 	layer->addChild(shipRepair, 3);
+	GameScene::playEffect(AUDIO_REPAIR);
 }

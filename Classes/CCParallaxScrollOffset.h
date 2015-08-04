@@ -4,7 +4,7 @@
 
 using namespace cocos2d;
 
-class CCParallaxScrollOffset : public cocos2d::Layer
+class CCParallaxScrollOffset : public Layer
 {
 public:
 	virtual bool init() override;
