@@ -52,7 +52,7 @@ void GameOverDialog::setupUI()
 
 void GameOverDialog::goToGameScene(Ref *sender, ui::Widget::TouchEventType type)
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
 		removeFromParentAndCleanup(true);
 		auto scene = GameScene::createScene();
@@ -62,7 +62,7 @@ void GameOverDialog::goToGameScene(Ref *sender, ui::Widget::TouchEventType type)
 
 void GameOverDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type)
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
 		removeFromParentAndCleanup(true);
 		auto scene = MainMenuScene::createScene();

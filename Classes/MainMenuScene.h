@@ -35,6 +35,6 @@ public:
 	void setParallaxBackground();
 	void rate(Ref *sender, ui::Widget::TouchEventType type);
 	void ranking(Ref *sender, ui::Widget::TouchEventType type);
-	void donation(Ref *sender, ui::Widget::TouchEventType type);
+	void displayOption(Ref *sender, ui::Widget::TouchEventType type);
 	void goToGameScene(Ref* sender, ui::Widget::TouchEventType type);
 };

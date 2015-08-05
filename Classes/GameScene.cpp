@@ -118,10 +118,10 @@ void GameScene::deletePools()
 
 void GameScene::playEffect(const char *path)
 {
-	if (UserDefault::getInstance()->getBoolForKey(EFFECT_KEY))
+	if (UserDefault::getInstance()->getBoolForKey(EFFECT_KEY, true))
 	{
 		auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
-		audio->playEffect(path);
+		audio->playEffect(path, false, 1.0f, 0.0f, 0.5f);
 	}
 }
 
@@ -129,7 +129,7 @@ void GameScene::checkSoundsSettings()
 {
 	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
 
-	if (userData->getBoolForKey(BGM_KEY))
+	if (userData->getBoolForKey(BGM_KEY, true))
 		audio->playBackgroundMusic(AUDIO_BACKGROUND, true);
 	else
 		audio->stopBackgroundMusic(true);
@@ -355,8 +355,8 @@ void GameScene::scaleDifficulty(Layer *layer)
 		GameScene::speedBackground = -0.01f - (GameScene::scorePoints / 200000.0f);
 
 	//Speed Meteors
-	if (GameScene::speedMeteor <= 0.0020f)
-		GameScene::speedMeteor = 0.0020f;
+	if (GameScene::speedMeteor <= 0.0025f)
+		GameScene::speedMeteor = 0.0025f;
 	else
 		GameScene::speedMeteor = 0.005f - (GameScene::scorePoints / 3000000.0f);
 
@@ -397,9 +397,9 @@ void GameScene::showGameDialog()
 	{
 		Director::getInstance()->pause();
 
-		if (userData->getBoolForKey(BGM_KEY))
+		if (userData->getBoolForKey(BGM_KEY, true))
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
-		if (userData->getBoolForKey(EFFECT_KEY))
+		if (userData->getBoolForKey(EFFECT_KEY, true))
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseAllEffects();
 
 		auto gameDialog = GameDialog::create();
@@ -410,16 +410,16 @@ void GameScene::showGameDialog()
 		removeChildByTag(DIALOG_OBJECT, true);
 		Director::getInstance()->resume();
 
-		if (userData->getBoolForKey(BGM_KEY))
+		if (userData->getBoolForKey(BGM_KEY, true))
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-		if (userData->getBoolForKey(EFFECT_KEY))
+		if (userData->getBoolForKey(EFFECT_KEY, true))
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeAllEffects();
 	}
 }
 
 void GameScene::onClickSettings(Ref* sender, ui::Widget::TouchEventType type)
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
 		showGameDialog();
 	}

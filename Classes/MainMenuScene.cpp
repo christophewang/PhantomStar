@@ -1,5 +1,6 @@
 #include "MainMenuScene.h"
 #include "GooglePlayServices.h"
+#include "OptionDialog.h"
 
 Scene* MainMenuScene::createScene()
 {
@@ -34,9 +35,11 @@ bool MainMenuScene::init()
 	auto rankingButton = static_cast<ui::Button*>(menu->getChildByName("rankingButton"));
 	rankingButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::ranking, this));
 
-	auto donationButton = static_cast<ui::Button*>(menu->getChildByName("donationButton"));
-	donationButton->setVisible(false);
-	donationButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::donation, this));
+	auto optionButton = static_cast<ui::Button*>(menu->getChildByName("optionButton"));
+	optionButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::displayOption, this));
+	//auto donationButton = static_cast<ui::Button*>(menu->getChildByName("donationButton"));
+	//donationButton->setVisible(false);
+	//donationButton->addTouchEventListener(CC_CALLBACK_2(MainMenuScene::donation, this));
 
 	auto keybackListener = EventListenerKeyboard::create();
 	keybackListener->onKeyReleased = CC_CALLBACK_2(MainMenuScene::onKeyReleased, this);
@@ -104,7 +107,7 @@ void MainMenuScene::update(float delta)
 
 void MainMenuScene::goToGameScene(Ref* sender, ui::Widget::TouchEventType type)
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
 		deletePools();
 		removeFromParentAndCleanup(true);
@@ -115,13 +118,13 @@ void MainMenuScene::goToGameScene(Ref* sender, ui::Widget::TouchEventType type)
 
 void MainMenuScene::rate(Ref *sender, ui::Widget::TouchEventType type)
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 		Application::getInstance()->openURL(LINK);
 }
 
 void MainMenuScene::ranking(Ref *sender, ui::Widget::TouchEventType type)
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
 		// Google Play Sign In
 		if (!NativeUtils::isSignedIn())
@@ -131,11 +134,12 @@ void MainMenuScene::ranking(Ref *sender, ui::Widget::TouchEventType type)
 	}
 }
 
-void MainMenuScene::donation(Ref *sender, ui::Widget::TouchEventType type)
+void MainMenuScene::displayOption(Ref *sender, ui::Widget::TouchEventType type)
 {
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
-		//TODO IAP Link donation
+		auto optionDialog = OptionDialog::create();
+		addChild(optionDialog, 4, DIALOG_OBJECT);
 	}
 }
 

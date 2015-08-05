@@ -33,11 +33,11 @@ void GameDialog::setupUI()
 	dialogBackground->setPosition(Point(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
 	bgmCheckBox = static_cast<ui::CheckBox*>(dialogBackground->getChildByName("bgmCheck"));
-	bgmCheckBox->setSelected(userData->getBoolForKey(BGM_KEY));
+	bgmCheckBox->setSelected(userData->getBoolForKey(BGM_KEY, true));
 	bgmCheckBox->addTouchEventListener(CC_CALLBACK_2(GameDialog::bgmListener, this));
 
 	effectCheckBox = static_cast<ui::CheckBox*>(dialogBackground->getChildByName("effectCheck"));
-	effectCheckBox->setSelected(userData->getBoolForKey(EFFECT_KEY));
+	effectCheckBox->setSelected(userData->getBoolForKey(EFFECT_KEY, true));
 	effectCheckBox->addTouchEventListener(CC_CALLBACK_2(GameDialog::effectListener, this));
 
 	auto resumeButton = static_cast<ui::Button*>(dialogBackground->getChildByName("resumeButton"));
@@ -74,12 +74,12 @@ void GameDialog::closeDialog(Ref *sender, ui::Widget::TouchEventType type)
 {
 	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
 
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
 		removeFromParentAndCleanup(true);
 		Director::getInstance()->resume();
 
-		if (userData->getBoolForKey(BGM_KEY))
+		if (userData->getBoolForKey(BGM_KEY, true))
 		{
 			if (audio->isBackgroundMusicPlaying())
 				audio->resumeBackgroundMusic();
@@ -89,7 +89,7 @@ void GameDialog::closeDialog(Ref *sender, ui::Widget::TouchEventType type)
 		else
 			audio->stopBackgroundMusic();
 		
-		if (userData->getBoolForKey(EFFECT_KEY))
+		if (userData->getBoolForKey(EFFECT_KEY, true))
 			audio->resumeAllEffects();
 		else
 			audio->stopAllEffects();
@@ -100,17 +100,14 @@ void GameDialog::goToMainMenuScene(Ref *sender, ui::Widget::TouchEventType type)
 {
 	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
 
-	if (type == ui::Widget::TouchEventType::BEGAN)
+	if (type == ui::Widget::TouchEventType::ENDED)
 	{
 		removeFromParentAndCleanup(true);
-		Director::getInstance()->resume();
 		auto scene = MainMenuScene::createScene();
-
+		Director::getInstance()->resume();
 		audio->stopBackgroundMusic(true);
 		audio->stopAllEffects();
-		if (userData->getBoolForKey(EFFECT_KEY))
-			audio->playEffect(AUDIO_SHIP_EXPLOSION);
-
+		GameScene::playEffect(AUDIO_SHIP_EXPLOSION);
 		Director::getInstance()->replaceScene(TransitionCrossFade::create(DELAY_TRANSITION, scene));
 	}
 }

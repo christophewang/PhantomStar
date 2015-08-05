@@ -33,12 +33,12 @@
 #define BODY_SHIP3 "PhysicsBodies/shipType3.json"
 
 /* AUDIO */
-#define AUDIO_STAR "Audio/star.wav"
-#define AUDIO_REPAIR "Audio/shipRepair.wav"
-#define AUDIO_SHIP_COLLISION "Audio/collisionShip.wav"
-#define AUDIO_METEOR_EXPLOSION "Audio/explosion.wav"
-#define AUDIO_SHIP_EXPLOSION "Audio/explosionShip.wav"
-#define AUDIO_BACKGROUND "Audio/bgm.mp3"
+#define AUDIO_STAR "Audio/star.ogg"
+#define AUDIO_REPAIR "Audio/shipRepair.ogg"
+#define AUDIO_SHIP_COLLISION "Audio/collisionShip.ogg"
+#define AUDIO_METEOR_EXPLOSION "Audio/explosionMeteor.ogg"
+#define AUDIO_SHIP_EXPLOSION "Audio/explosionShip.ogg"
+#define AUDIO_BACKGROUND "Audio/bgm.ogg"
 
 /* FONT */
 #define FONT "Fonts/kenvector_future_thin.ttf"
@@ -79,4 +79,5 @@
 #define HIGHSCORE_KEY "HIGHSCORE"
 #define GAME_MENU "GameMenu.csb"
 #define GAME_DIALOG "GameDialog.csb"
+#define OPTION_DIALOG "OptionDialog.csb"
 #define GAMEOVER_DIALOG "GameOverDialog.csb"

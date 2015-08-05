@@ -31,7 +31,7 @@ public:
 	void updateLife(Layer *layer);
 	void incrementLife(Layer *layer);
 	void reduceLife(Layer *layer);
-	void resetContact();
+	void resetShip();
 	void scalingEffect();
 	void displayCollision(Layer *layer);
 	void displayExplosion(Layer *layer);

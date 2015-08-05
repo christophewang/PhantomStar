@@ -10,7 +10,7 @@ void Meteor::runMeteor(Layer *layer, int index, float speed)
 	if (GameScene::scorePoints < 10000)
 		meteorIndex = rand() % 8 + 1;
 	else
-		meteorIndex = rand() % 16 + 1;
+		meteorIndex = rand() % 14 + 1;
 
 	if (meteorIndex > 0 && meteorIndex <= 4)
 		type = 3;

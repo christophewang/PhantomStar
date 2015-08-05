@@ -49,7 +49,9 @@ Ship::Ship(Layer *layer)
 	body->setRotationEnable(false);
 	sprite->setPhysicsBody(body);
 
-	sprite->runAction(Sequence::create(Blink::create(1.0f, 10), Show::create(), nullptr));
+	sprite->runAction(
+		Sequence::createWithTwoActions(Blink::create(1.0f, 10),
+		CallFunc::create(CC_CALLBACK_0(Ship::resetShip, this))));
 
 	damageOne->setPosition(Point(width / 2, height / 2));
 	damageTwo->setPosition(Point(width / 2, height / 2));
@@ -174,26 +176,23 @@ void Ship::reduceLife(Layer *layer)
 		// Ship in Blink Mode - Contact inactive
 		body->setContactTestBitmask(false);
 		sprite->runAction(
-			Sequence::create(Blink::create(0.5f, 10),
-			Show::create(),
-			CallFunc::create(CC_CALLBACK_0(Ship::resetContact, this)),
-			nullptr));
+			Sequence::createWithTwoActions(Blink::create(0.5f, 10),
+			CallFunc::create(CC_CALLBACK_0(Ship::resetShip, this))));
 	}
 }
 
-void Ship::resetContact()
+void Ship::resetShip()
 {
 	body->setContactTestBitmask(true);
+	sprite->runAction(Show::create());
 }
 
 void Ship::scalingEffect()
 {
-	sprite->stopAllActions();
-	sprite->runAction(Sequence::create(
+	sprite->runAction(
+		Sequence::createWithTwoActions(
 		ScaleBy::create(0.125f, 1.2f),
-		ScaleBy::create(0.125f, 0.9f),
-		nullptr
-		));
+		ScaleBy::create(0.125f, 0.9f)));
 	sprite->setScale(1.0f);
 }
 
