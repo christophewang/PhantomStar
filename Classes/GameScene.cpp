@@ -34,7 +34,7 @@ Scene* GameScene::createScene()
 	layer->sceneWorld = scene->getPhysicsWorld();
 	/* Debug Mode */
 	//scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
-	director->setDisplayStats(true);
+	//director->setDisplayStats(true);
 	scene->addChild(layer);
 	return scene;
 }
