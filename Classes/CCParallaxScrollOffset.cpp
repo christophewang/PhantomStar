@@ -35,7 +35,8 @@ CCParallaxScrollOffset* CCParallaxScrollOffset::scrollWithNode(Node *node, Point
 }
 
 CCParallaxScrollOffset* CCParallaxScrollOffset::initWithNode(Node *node, Point r, Point p, Point s, Point v){
-    if(!this) return false;
+    if(!this)
+        return nullptr;
     this->setRatio(r);
     this->setScrollOffset(s);
     this->setRelVelocity(v);
